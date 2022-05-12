@@ -1,14 +1,20 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/yunyandz/tiktok-demo-backend/internal/router"
+	"github.com/yunyandz/tiktok-demo-backend/internal/config"
+	"github.com/yunyandz/tiktok-demo-backend/internal/dao/mysql"
+	"github.com/yunyandz/tiktok-demo-backend/internal/dao/redis"
+	"github.com/yunyandz/tiktok-demo-backend/internal/httpserver"
+	"github.com/yunyandz/tiktok-demo-backend/internal/logger"
 )
 
 func main() {
-	r := gin.Default()
-
-	router.InitRouter(r)
-
-	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	cfg, err := config.Phase()
+	if err != nil {
+		panic(err)
+	}
+	logger.New(cfg)
+	mysql.New(cfg)
+	redis.New(cfg)
+	httpserver.Run(cfg)
 }

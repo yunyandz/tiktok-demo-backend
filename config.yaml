@@ -1,0 +1,14 @@
+Http:
+  host: localhost
+  port: 8080
+redis:
+  host: localhost
+  port: 6379
+  db: 0
+  password:
+mysql:
+  host: localhost
+  port: 3306
+  user: root
+  password:
+  database: tiktok
