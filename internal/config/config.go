@@ -16,10 +16,10 @@ type Config struct {
 		Host     string `yaml:"host"`
 		Port     string `yaml:"port"`
 		Password string `yaml:"password"`
-		DB       int    `yaml:"db"`
+		Database int    `yaml:"database"`
 	} `yaml:"redis"`
 	Mysql struct {
-		Name     string `yaml:"name"`
+		User     string `yaml:"user"`
 		Host     string `yaml:"host"`
 		Port     string `yaml:"port"`
 		Password string `yaml:"password"`

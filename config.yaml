@@ -1,4 +1,4 @@
-Http:
+http:
   host: localhost
   port: 8080
 redis:
@@ -9,6 +9,6 @@ redis:
 mysql:
   host: localhost
   port: 3306
-  user: root
-  password:
+  user: tiktok
+  password: tiktok
   database: tiktok
