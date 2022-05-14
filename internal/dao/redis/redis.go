@@ -19,8 +19,8 @@ func New(cfg *config.Config) *redis.Client {
 	once.Do(func() {
 		rdb = redis.NewClient(&redis.Options{
 			Addr:     host,
-			Password: cfg.Redis.Password, // no password set
-			DB:       cfg.Redis.Database, // use default DB
+			Password: cfg.Redis.Password,
+			DB:       cfg.Redis.Database,
 		})
 	})
 	return rdb
