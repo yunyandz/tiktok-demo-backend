@@ -17,7 +17,7 @@ type Controller struct {
 	logger  *zap.Logger
 }
 
-func newController(service *service.Service, logger *zap.Logger) *Controller {
+func New(service *service.Service, logger *zap.Logger) *Controller {
 	once.Do(func() {
 		controller = &Controller{
 			service: service,

@@ -20,7 +20,7 @@ var (
 )
 
 // 启动一个新的service实例，当然是单例模式
-func newService(db *gorm.DB, rds *redis.Client, logger *zap.Logger) *Service {
+func New(db *gorm.DB, rds *redis.Client, logger *zap.Logger) *Service {
 	once.Do(func() {
 		service = &Service{
 			db:     db,
