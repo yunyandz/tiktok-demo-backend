@@ -8,14 +8,14 @@ import (
 )
 
 func (ctl *Controller) Publish(c *gin.Context) {
-	token := c.Query("token")
+	// token := c.Query("token")
 	c.JSON(http.StatusOK, service.Response{
 		StatusCode: 0,
 	})
 }
 
 func (ctl *Controller) PublishList(c *gin.Context) {
-	c.JSON(http.StatusOK, VideoListResponse{
+	c.JSON(http.StatusOK, service.VideoListResponse{
 		Response: service.Response{
 			StatusCode: 0,
 		},
