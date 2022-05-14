@@ -4,28 +4,17 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/yunyandz/tiktok-demo-backend/internal/service"
 )
 
-type CommentListResponse struct {
-	Response
-	CommentList []Comment `json:"comment_list,omitempty"`
-}
-
-// CommentAction no practical effect, just check if token is valid
-func CommentAction(c *gin.Context) {
+func (ctl *Controller) CommentAction(c *gin.Context) {
 	token := c.Query("token")
 
-	if _, exist := usersLoginInfo[token]; exist {
-		c.JSON(http.StatusOK, Response{StatusCode: 0})
-	} else {
-		c.JSON(http.StatusOK, Response{StatusCode: 1, StatusMsg: "User doesn't exist"})
-	}
+	c.JSON(http.StatusOK, service.Response{StatusCode: 0})
 }
 
-// CommentList all videos have same demo comment list
-func CommentList(c *gin.Context) {
-	c.JSON(http.StatusOK, CommentListResponse{
-		Response:    Response{StatusCode: 0},
-		CommentList: DemoComments,
+func (ctl *Controller) CommentList(c *gin.Context) {
+	c.JSON(http.StatusOK, service.CommentListResponse{
+		Response: service.Response{StatusCode: 0},
 	})
 }

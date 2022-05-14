@@ -16,6 +16,10 @@ func (s *Service) PublishComment(userId int64, videoId int64, content string) Re
 	return Response{}
 }
 
+func (s *Service) DeleteComment(userId int64, commentId int64) Response {
+	return Response{}
+}
+
 func (s *Service) GetCommentList(userId int64, videoId int64) CommentListResponse {
 	return CommentListResponse{}
 }

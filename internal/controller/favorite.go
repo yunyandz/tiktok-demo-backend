@@ -4,25 +4,19 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/yunyandz/tiktok-demo-backend/internal/service"
 )
 
-// FavoriteAction no practical effect, just check if token is valid
-func FavoriteAction(c *gin.Context) {
+func (ctl *Controller) FavoriteAction(c *gin.Context) {
 	token := c.Query("token")
 
-	if _, exist := usersLoginInfo[token]; exist {
-		c.JSON(http.StatusOK, Response{StatusCode: 0})
-	} else {
-		c.JSON(http.StatusOK, Response{StatusCode: 1, StatusMsg: "User doesn't exist"})
-	}
+	c.JSON(http.StatusOK, service.Response{StatusCode: 0})
 }
 
-// FavoriteList all users have same favorite video list
-func FavoriteList(c *gin.Context) {
-	c.JSON(http.StatusOK, VideoListResponse{
-		Response: Response{
+func (ctl *Controller) FavoriteList(c *gin.Context) {
+	c.JSON(http.StatusOK, service.VideoListResponse{
+		Response: service.Response{
 			StatusCode: 0,
 		},
-		VideoList: DemoVideos,
 	})
 }
