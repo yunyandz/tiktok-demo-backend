@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/yunyandz/tiktok-demo-backend/internal/config"
 	"github.com/yunyandz/tiktok-demo-backend/internal/controller"
-	"github.com/yunyandz/tiktok-demo-backend/internal/router"
+	"github.com/yunyandz/tiktok-demo-backend/internal/httpserver/router"
 	"go.uber.org/zap"
 )
 
