@@ -3,6 +3,7 @@ package router
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/yunyandz/tiktok-demo-backend/internal/controller"
+	"github.com/yunyandz/tiktok-demo-backend/internal/httpserver/middleware"
 )
 
 func InitRouter(r *gin.Engine, ctl *controller.Controller) {
@@ -13,7 +14,9 @@ func InitRouter(r *gin.Engine, ctl *controller.Controller) {
 
 	// basic apis
 	apiRouter.GET("/feed/", ctl.Feed)
-	apiRouter.GET("/user", ctl.UserInfo)
+
+	// using jwt auth
+	apiRouter.GET("/user", middleware.JWTAuth(), ctl.UserInfo)
 	apiRouter.POST("/user/register", ctl.Register)
 	apiRouter.POST("/user/login", ctl.Login)
 	apiRouter.POST("/publish/action/", ctl.Publish)

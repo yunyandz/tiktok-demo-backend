@@ -25,6 +25,7 @@ func CreateUserClaims(username string) (string, error) {
 	claims := UserClaims{
 		username,
 		jwt.StandardClaims{
+			IssuedAt:  time.Now().Unix(),
 			ExpiresAt: time.Now().Add(time.Second * EXPIRES_TIME).Unix(),
 			Issuer:    ISSUER,
 		},
