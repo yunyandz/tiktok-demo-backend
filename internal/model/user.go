@@ -1,7 +1,7 @@
 package model
 
 import (
-	"github.com/go-redis/redis"
+	"github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
 )
 
@@ -10,6 +10,9 @@ type User struct {
 
 	Username string `gorm:"size:32;unique_index"`
 	Password string `gorm:"size:256"`
+
+	FollowCount   int64 `gorm:"type:int"`
+	FollowerCount int64 `gorm:"type:int"`
 
 	Videos    []Video `gorm:"many2many:user_videos"`
 	Followers []User  `gorm:"many2many:user_follows"`
@@ -37,6 +40,21 @@ func (u *UserModel) GetUser(id uint64) (*User, error) {
 		return nil, err
 	}
 	return &user, nil
+}
+
+func (u *UserModel) GetUserByName(username string) (*User, error) {
+	var user User
+	if err := u.db.Where("username = ?", username).First(&user).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (u *UserModel) CreateUser(user *User) (id uint64, err error) {
+
+	err = u.db.Model(&User{}).Save(user).Error
+
+	return uint64(user.ID), err
 }
 
 // 获取用户的关注列表
