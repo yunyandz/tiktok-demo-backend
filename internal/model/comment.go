@@ -5,8 +5,8 @@ import "gorm.io/gorm"
 type Comment struct {
 	gorm.Model
 
-	UserId  uint64 `gorm:"index"`
-	VideoId uint64 `gorm:"index"`
+	UserID  uint64 `gorm:"index"`
+	VideoID uint64 `gorm:"index"`
 
 	Content string `gorm:"size:1024"`
 }
