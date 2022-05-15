@@ -11,7 +11,7 @@ type User struct {
 	Username string `gorm:"size:32;unique_index"`
 	Password string `gorm:"size:256"`
 
-	Videos    []Video `gorm:"many2many:user_videos"`
+	Videos    []Video `form:"foreignkey:UserId"`
 	Followers []User  `gorm:"many2many:user_follows"`
 	Likes     []Video `gorm:"many2many:user_likes"`
 }
