@@ -8,7 +8,7 @@ import (
 type Video struct {
 	gorm.Model
 
-	AuthorID uint64 `gorm:"index"`
+	Author User `gorm:"many2many:user_videos"`
 
 	Title       string `gorm:"size:128"`
 	Description string `gorm:"size:1024"`
@@ -19,7 +19,7 @@ type Video struct {
 	Likecount    uint64
 
 	Likes    []User    `gorm:"many2many:user_likes"`
-	Comments []Comment `gorm:"foreignkey:VideoID"`
+	Comments []Comment `gorm:"many2many:video_comments"`
 }
 
 type VideoModel struct {
