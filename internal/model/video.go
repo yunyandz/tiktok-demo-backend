@@ -8,16 +8,18 @@ import (
 type Video struct {
 	gorm.Model
 
-	Userid       int64
-	Title        string
-	Description  string
-	Playurl      string
-	Coverurl     string
-	Commentcount int64
-	Likecount    int64
+	UserId uint64 `gorm:"index"`
+
+	Title       string `gorm:"size:128"`
+	Description string `gorm:"size:1024"`
+	Playurl     string `gorm:"size:256"`
+	Coverurl    string `gorm:"size:256"`
+
+	Commentcount uint64
+	Likecount    uint64
 
 	Likes    []User    `gorm:"many2many:user_likes"`
-	Comments []Comment `gorm:"foreignkey:Videoid"`
+	Comments []Comment `gorm:"foreignkey:VideoId"`
 }
 
 type VideoModel struct {
@@ -43,7 +45,7 @@ func (v *VideoModel) CreateVideo(video *Video) error {
 }
 
 // 更新视频的播放地址，通常用于视频上传完成后
-func (u *VideoModel) UpdateVideoPlayUrl(id uint, playUrl string) error {
+func (u *VideoModel) UpdateVideoPlayUrl(id uint64, playUrl string) error {
 	if err := u.db.Exec("update videos set play_url = ? where id = ?", playUrl, id).Error; err != nil {
 		return err
 	}
@@ -60,16 +62,16 @@ func (v *VideoModel) GetNewVideos() ([]*Video, error) {
 }
 
 // 获取视频的详情
-func (v *VideoModel) GetVideo(id uint) (*Video, error) {
+func (v *VideoModel) GetVideo(videoId uint64) (*Video, error) {
 	var video Video
-	if err := v.db.First(&video, id).Error; err != nil {
+	if err := v.db.First(&video, videoId).Error; err != nil {
 		return nil, err
 	}
 	return &video, nil
 }
 
 // 获取用户的视频列表
-func (v *VideoModel) GetVideosByUser(userId uint) ([]*Video, error) {
+func (v *VideoModel) GetVideosByUser(userId uint64) ([]*Video, error) {
 	var videos []*Video
 	if err := v.db.Where("user_id = ?", userId).Find(&videos).Error; err != nil {
 		return nil, err
@@ -78,7 +80,7 @@ func (v *VideoModel) GetVideosByUser(userId uint) ([]*Video, error) {
 }
 
 // 获取用户的视频点赞列表
-func (v *VideoModel) GetUserLikeVideos(userId uint) ([]*Video, error) {
+func (v *VideoModel) GetUserLikeVideos(userId uint64) ([]*Video, error) {
 	var videos []*Video
 	if err := v.db.Where("id in (select video_id from likes where user_id = ?)", userId).Find(&videos).Error; err != nil {
 		return nil, err
@@ -87,7 +89,7 @@ func (v *VideoModel) GetUserLikeVideos(userId uint) ([]*Video, error) {
 }
 
 // 点赞视频
-func (v *VideoModel) LikeVideo(userId uint, videoId uint) error {
+func (v *VideoModel) LikeVideo(userId uint64, videoId uint64) error {
 	if err := v.db.Exec("insert into likes (user_id, video_id) values (?, ?)", userId, videoId).Error; err != nil {
 		return err
 	}
@@ -95,7 +97,7 @@ func (v *VideoModel) LikeVideo(userId uint, videoId uint) error {
 }
 
 // 取消点赞视频
-func (v *VideoModel) UnLikeVideo(userId uint, videoId uint) error {
+func (v *VideoModel) UnLikeVideo(userId uint64, videoId uint64) error {
 	if err := v.db.Exec("delete from likes where user_id = ? and video_id = ?", userId, videoId).Error; err != nil {
 		return err
 	}
@@ -103,7 +105,7 @@ func (v *VideoModel) UnLikeVideo(userId uint, videoId uint) error {
 }
 
 // 获取视频的点赞数
-func (v *VideoModel) GetVideoLikesCount(id uint) (int, error) {
+func (v *VideoModel) GetVideoLikesCount(id uint64) (int, error) {
 	var count int64
 	if err := v.db.Model(&Video{}).Where("id = ?", id).Count(&count).Error; err != nil {
 		return 0, err

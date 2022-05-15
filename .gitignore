@@ -21,3 +21,6 @@
 go.work
 
 .idea
+
+# Config file
+config.yaml

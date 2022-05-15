@@ -8,8 +8,8 @@ import (
 type User struct {
 	gorm.Model
 
-	Username string
-	Password string
+	Username string `gorm:"size:32;unique_index"`
+	Password string `gorm:"size:256"`
 
 	Videos    []Video `gorm:"many2many:user_videos"`
 	Followers []User  `gorm:"many2many:user_follows"`
@@ -31,7 +31,7 @@ func NewUserModel(db *gorm.DB, rdb *redis.Client) *UserModel {
 // Todo: 实现redis缓存
 
 // 获取用户信息
-func (u *UserModel) GetUser(id uint) (*User, error) {
+func (u *UserModel) GetUser(id uint64) (*User, error) {
 	var user User
 	if err := u.db.First(&user, id).Error; err != nil {
 		return nil, err
@@ -40,7 +40,7 @@ func (u *UserModel) GetUser(id uint) (*User, error) {
 }
 
 // 获取用户的关注列表
-func (u *UserModel) GetFollowList(userId uint) ([]*User, error) {
+func (u *UserModel) GetFollowList(userId uint64) ([]*User, error) {
 	var users []*User
 	if err := u.db.Where("id in (select followed_id from follows where follower_id = ?)", userId).Find(&users).Error; err != nil {
 		return nil, err
@@ -49,7 +49,7 @@ func (u *UserModel) GetFollowList(userId uint) ([]*User, error) {
 }
 
 // 获取用户的粉丝列表
-func (u *UserModel) GetFollowerList(userId uint) ([]*User, error) {
+func (u *UserModel) GetFollowerList(userId uint64) ([]*User, error) {
 	var users []*User
 	if err := u.db.Where("id in (select follower_id from followers where user_id = ?)", userId).Find(&users).Error; err != nil {
 		return nil, err
@@ -58,7 +58,7 @@ func (u *UserModel) GetFollowerList(userId uint) ([]*User, error) {
 }
 
 // 关注一个用户
-func (u *UserModel) CreateFollow(userId uint, followId uint) error {
+func (u *UserModel) CreateFollow(userId uint64, followId uint64) error {
 	if err := u.db.Exec("insert into followers (user_id, follower_id) values (?, ?)", userId, followId).Error; err != nil {
 		return err
 	}
@@ -66,7 +66,7 @@ func (u *UserModel) CreateFollow(userId uint, followId uint) error {
 }
 
 // 取消关注一个用户
-func (u *UserModel) DeleteFollow(userId uint, followId uint) error {
+func (u *UserModel) DeleteFollow(userId uint64, followId uint64) error {
 	if err := u.db.Exec("delete from followers where user_id = ? and follower_id = ?", userId, followId).Error; err != nil {
 		return err
 	}
