@@ -77,15 +77,16 @@ func (u *UserModel) GetFollowerList(userId uint64) ([]*User, error) {
 
 // 关注一个用户
 func (u *UserModel) CreateFollow(userId uint64, followId uint64) error {
-	if err := u.db.Exec("insert into followers (user_id, follower_id) values (?, ?)", userId, followId).Error; err != nil {
+	if err := u.db.Exec("insert into user_follows (user_id, follower_id) values (?, ?)", userId, followId).Error; err != nil {
 		return err
 	}
+	// Todo: Redis缓存
 	return nil
 }
 
 // 取消关注一个用户
 func (u *UserModel) DeleteFollow(userId uint64, followId uint64) error {
-	if err := u.db.Exec("delete from followers where user_id = ? and follower_id = ?", userId, followId).Error; err != nil {
+	if err := u.db.Exec("delete from user_follows where user_id = ? and follower_id = ?", userId, followId).Error; err != nil {
 		return err
 	}
 	return nil

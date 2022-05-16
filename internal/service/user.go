@@ -114,7 +114,21 @@ func (s *Service) Login(username string, password string) (*UserLoginResponse, e
 }
 
 func (s *Service) Follow(userId uint64, to_userId uint64) Response {
-	return Response{}
+	userModel := model.NewUserModel(s.db, s.rds)
+	err := userModel.CreateFollow(userId, to_userId)
+	if err != nil {
+		return Response{StatusCode: 1, StatusMsg: err.Error()}
+	}
+	return Response{StatusCode: 0, StatusMsg: "Follow succeed"}
+}
+
+func (s *Service) UnFollow(userId uint64, to_userId uint64) Response {
+	userModel := model.NewUserModel(s.db, s.rds)
+	err := userModel.DeleteFollow(userId, to_userId)
+	if err != nil {
+		return Response{StatusCode: 1, StatusMsg: err.Error()}
+	}
+	return Response{StatusCode: 0, StatusMsg: "UnFollow succeed"}
 }
 
 func (s *Service) GetFollowList(userId uint64) UserListResponse {
