@@ -28,13 +28,13 @@ type UserListResponse struct {
 
 type UserLoginResponse struct {
 	Response
-	UserId uint64 `json:"user_id,omitempty"`
+	UserID uint64 `json:"user_id,omitempty"`
 	Token  string `json:"token"`
 }
 
 type UserRegisterResponse struct {
 	Response
-	UserId uint64 `json:"user_id,omitempty"`
+	UserID uint64 `json:"user_id,omitempty"`
 	Token  string `json:"token"`
 }
 
@@ -76,7 +76,7 @@ func (s *Service) Register(username string, password string) (*UserRegisterRespo
 		StatusCode: 0,
 		StatusMsg:  "ok",
 	}
-	res.UserId = id
+	res.UserID = id
 	res.Token = token
 
 	return &res, nil
@@ -106,28 +106,28 @@ func (s *Service) Login(username string, password string) (*UserLoginResponse, e
 			StatusCode: 0,
 			StatusMsg:  "ok",
 		},
-		UserId: uint64(user.ID),
+		UserID: uint64(user.ID),
 		Token:  token,
 	}
 
 	return &rsp, nil
 }
 
-func (s *Service) Follow(userId uint64, to_userId uint64) Response {
+func (s *Service) Follow(UserID uint64, to_UserID uint64) Response {
 	return Response{}
 }
 
-func (s *Service) GetFollowList(userId uint64) UserListResponse {
+func (s *Service) GetFollowList(UserID uint64) UserListResponse {
 	return UserListResponse{}
 }
 
-func (s *Service) GetFollowerList(userId uint64) UserListResponse {
+func (s *Service) GetFollowerList(UserID uint64) UserListResponse {
 	return UserListResponse{}
 }
 
-func (s *Service) GetUserInfo(userId uint64) (*UserResponse, error) {
+func (s *Service) GetUserInfo(UserID uint64) (*UserResponse, error) {
 	userModel := model.NewUserModel(s.db, s.rds)
-	user, err := userModel.GetUser(userId)
+	user, err := userModel.GetUser(UserID)
 	if err != nil {
 		return nil, errorx.ErrUserDoesNotExists
 	}

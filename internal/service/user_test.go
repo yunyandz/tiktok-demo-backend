@@ -1,13 +1,14 @@
 package service
 
 import (
+	"strconv"
+	"testing"
+
 	"github.com/stretchr/testify/require"
 	"github.com/yunyandz/tiktok-demo-backend/internal/config"
 	"github.com/yunyandz/tiktok-demo-backend/internal/dao/mysql"
 	"github.com/yunyandz/tiktok-demo-backend/internal/dao/redis"
 	"github.com/yunyandz/tiktok-demo-backend/internal/logger"
-	"strconv"
-	"testing"
 )
 
 var UserTestSvr *Service
@@ -30,7 +31,7 @@ func TestService_Register(t *testing.T) {
 		require.NoError(t, err)
 		require.NotEmpty(t, response)
 		require.NotEmpty(t, response.Token)
-		require.Equal(t, uint64(i+1), response.UserId)
+		require.Equal(t, uint64(i+1), response.UserID)
 		require.Equal(t, int32(0), response.Response.StatusCode)
 		require.Equal(t, "ok", response.Response.StatusMsg)
 	}
@@ -44,7 +45,7 @@ func TestService_Login(t *testing.T) {
 		require.NoError(t, err)
 		require.NotEmpty(t, response)
 		require.NotEmpty(t, response.Token)
-		require.Equal(t, uint64(i+1), response.UserId)
+		require.Equal(t, uint64(i+1), response.UserID)
 		require.Equal(t, int32(0), response.Response.StatusCode)
 		require.Equal(t, "ok", response.Response.StatusMsg)
 	}
