@@ -31,6 +31,9 @@ type Config struct {
 		Region    string `yaml:"region"`
 		Bucket    string `yaml:"bucket"`
 	} `yaml:"s3"`
+	Kafka struct {
+		Brokers []string `yaml:"brokers"`
+	} `yaml:"kafka"`
 }
 
 var (

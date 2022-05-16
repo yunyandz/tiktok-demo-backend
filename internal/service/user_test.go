@@ -21,7 +21,7 @@ func init() {
 	mylogger := logger.New(cfg)
 	db := mysql.New(cfg, mylogger)
 	rds := redis.New(cfg)
-	UserTestSvr = New(db, rds, mylogger)
+	UserTestSvr = New(db, rds, mylogger, nil)
 }
 
 func TestService_Register(t *testing.T) {

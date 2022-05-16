@@ -6,6 +6,7 @@ import (
 	"github.com/yunyandz/tiktok-demo-backend/internal/dao/mysql"
 	"github.com/yunyandz/tiktok-demo-backend/internal/dao/redis"
 	"github.com/yunyandz/tiktok-demo-backend/internal/httpserver"
+	"github.com/yunyandz/tiktok-demo-backend/internal/kafka"
 	"github.com/yunyandz/tiktok-demo-backend/internal/logger"
 	"github.com/yunyandz/tiktok-demo-backend/internal/service"
 )
@@ -18,7 +19,8 @@ func main() {
 	mylogger := logger.New(cfg)
 	db := mysql.New(cfg, mylogger)
 	rds := redis.New(cfg)
-	ser := service.New(db, rds, mylogger)
+	pdc := kafka.NewProducer(cfg)
+	ser := service.New(db, rds, mylogger, &pdc)
 	ctl := controller.New(ser, mylogger)
 	httpserver.Run(cfg, ctl, mylogger)
 }

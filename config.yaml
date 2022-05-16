@@ -12,3 +12,6 @@ mysql:
   user: root
   password: 1
   database: tiktok
+kafka:
+  brokers:
+    - localhost:9092
