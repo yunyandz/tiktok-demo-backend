@@ -42,7 +42,7 @@ func (ctl *Controller) Register(c *gin.Context) {
 	}
 
 	rsp.Response = r.Response
-	rsp.UserID = r.UserId
+	rsp.UserID = r.UserID
 	rsp.Token = r.Token
 	c.JSON(http.StatusOK, rsp)
 }
@@ -82,7 +82,7 @@ func (ctl *Controller) Login(c *gin.Context) {
 	}
 
 	rsp.Response = r.Response
-	rsp.UserID = r.UserId
+	rsp.UserID = r.UserID
 	rsp.Token = r.Token
 	c.JSON(http.StatusOK, rsp)
 }
