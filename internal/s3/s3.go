@@ -23,8 +23,9 @@ func New(config *config.Config, logger *zap.Logger) *s3.Client {
 	if err != nil {
 		panic(err)
 	}
-
 	client := s3.NewFromConfig(cfg)
+
+	// 检查bucket是否存在，不存在则创建
 	burkets, err := client.ListBuckets(context.TODO(), nil)
 	if err != nil {
 		panic(err)

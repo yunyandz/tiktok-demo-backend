@@ -13,6 +13,7 @@ import (
 
 func (s *Service) PublishVideo(UserID uint64, filename string, videodata io.Reader) Response {
 	go func() {
+		// TODO: 没经过测试并且也没有编写好Mock测试。
 		_, err := s.s3.PutObject(context.TODO(), &s3.PutObjectInput{
 			Bucket: aws.String(constant.BucketName),
 			Key:    &filename,
