@@ -19,15 +19,15 @@ func (ctl *Controller) RelationAction(c *gin.Context) {
 	var req RealationRequest
 	err := c.ShouldBind(&req)
 	if err != nil {
-		c.JSON(http.StatusOK, service.Response{StatusCode: 1, StatusMsg: err.Error()})
+		c.JSON(http.StatusBadRequest, service.Response{StatusCode: 1, StatusMsg: err.Error()})
 		return
 	}
 	switch req.ActionType {
 	case 1:
-		rsp := ctl.service.Follow(req.UserId, req.ToUserId)
+		rsp := ctl.service.Follow(req.ToUserId, req.UserId)
 		c.JSON(http.StatusOK, rsp)
 	case 2:
-		rsp := ctl.service.UnFollow(req.UserId, req.ToUserId)
+		rsp := ctl.service.UnFollow(req.ToUserId, req.UserId)
 		c.JSON(http.StatusOK, rsp)
 	default:
 		c.JSON(http.StatusOK, service.Response{StatusCode: 1, StatusMsg: "invaild action"})
@@ -35,12 +35,26 @@ func (ctl *Controller) RelationAction(c *gin.Context) {
 	// c.JSON(http.StatusOK, service.Response{StatusCode: 1, StatusMsg: "User doesn't exist"})
 }
 
+type FollowRequest struct {
+	UserId uint64 `form:"user_id" binding:"required"`
+	Token  string `form:"token" binding:"required"`
+}
+
 func (ctl *Controller) FollowList(c *gin.Context) {
-	c.JSON(http.StatusOK, service.UserListResponse{
-		Response: service.Response{
-			StatusCode: 0,
-		},
-	})
+	var req FollowRequest
+	err := c.ShouldBindQuery(&req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, service.UserListResponse{
+			Response: service.Response{
+				StatusCode: 0,
+				StatusMsg:  err.Error(),
+			},
+		})
+		return
+	}
+
+	rsp := ctl.service.GetFollowList(req.UserId)
+	c.JSON(http.StatusOK, rsp)
 }
 
 func (ctl *Controller) FollowerList(c *gin.Context) {

@@ -16,8 +16,8 @@ type User struct {
 
 	ID            uint64 `json:"id"`
 	Username      string `json:"name"`
-	FollowCount   int64  `json:"follow-count"`
-	FollowerCount int64  `json:"follower-count"`
+	FollowCount   int64  `json:"follow_count"`
+	FollowerCount int64  `json:"follower_count"`
 	IsFollow      bool   `json:"is_follow"`
 }
 
@@ -132,7 +132,33 @@ func (s *Service) UnFollow(userId uint64, to_userId uint64) Response {
 }
 
 func (s *Service) GetFollowList(userId uint64) UserListResponse {
-	return UserListResponse{}
+	userModel := model.NewUserModel(s.db, s.rds)
+	followList, err := userModel.GetFollowList(userId)
+	if err != nil {
+		return UserListResponse{
+			Response: Response{
+				StatusCode: 1,
+				StatusMsg:  err.Error(),
+			},
+		}
+	}
+	var users []User
+	var user *User
+	for _, item := range followList {
+		user = &User{}
+		user.ID = uint64(item.ID)
+		user.Username = item.Username
+		user.FollowCount = item.FollowCount
+		user.FollowerCount = item.FollowerCount
+		user.IsFollow = true
+		users = append(users, *user)
+	}
+	return UserListResponse{
+		Response: Response{
+			StatusCode: 0,
+		},
+		UserList: users,
+	}
 }
 
 func (s *Service) GetFollowerList(userId uint64) UserListResponse {
