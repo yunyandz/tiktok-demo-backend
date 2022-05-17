@@ -66,7 +66,10 @@ func (s *Service) Register(username string, password string) (*UserRegisterRespo
 		return nil, errorx.ErrInternalBusy
 	}
 
-	token, err := jwtx.CreateUserClaims(username)
+	token, err := jwtx.CreateUserClaims(jwtx.UserInfo{
+		Username: username,
+		UserID:   uint64(id),
+	})
 	if err != nil {
 		logger.Suger().Errorw("Register CreateUserClaims failed", "err", err.Error())
 		return nil, errorx.ErrInternalBusy
@@ -94,14 +97,16 @@ func (s *Service) Login(username string, password string) (*UserLoginResponse, e
 		return nil, errorx.ErrUserPassword
 	}
 
-	token, err := jwtx.CreateUserClaims(username)
+	token, err := jwtx.CreateUserClaims(jwtx.UserInfo{
+		Username: username,
+		UserID:   uint64(user.ID),
+	})
 	if err != nil {
 		logger.Suger().Errorw("Login CreateUserClaims failed", "err", err.Error())
 		return nil, errorx.ErrInternalBusy
 	}
 
-	var rsp UserLoginResponse
-	rsp = UserLoginResponse{
+	rsp := UserLoginResponse{
 		Response: Response{
 			StatusCode: 0,
 			StatusMsg:  "ok",
@@ -135,8 +140,7 @@ func (s *Service) GetUserInfo(UserID uint64) (*UserResponse, error) {
 	// TODO 需要查follow表
 	// favoriteModel.IsFollow()
 
-	var rsp UserResponse
-	rsp = UserResponse{
+	rsp := UserResponse{
 		Response: Response{
 			StatusCode: 0,
 			StatusMsg:  "ok",
