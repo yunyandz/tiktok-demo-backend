@@ -8,29 +8,42 @@ import (
 )
 
 type Config struct {
-	Http struct {
-		Host string `yaml:"host"`
-		Port string `yaml:"port"`
-	} `yaml:"http"`
-	Redis struct {
-		Host     string `yaml:"host"`
-		Port     string `yaml:"port"`
-		Password string `yaml:"password"`
-		Database int    `yaml:"database"`
-	} `yaml:"redis"`
-	Mysql struct {
-		User     string `yaml:"user"`
-		Host     string `yaml:"host"`
-		Port     string `yaml:"port"`
-		Password string `yaml:"password"`
-		Database string `yaml:"database"`
-	} `yaml:"mysql"`
-	S3 struct {
-		AccessKey string `yaml:"accesskey"`
-		SecretKey string `yaml:"secretkey"`
-		Region    string `yaml:"region"`
-		Bucket    string `yaml:"bucket"`
-	} `yaml:"s3"`
+	Http  Http  `yaml:"http"`
+	Redis Redis `yaml:"redis"`
+	Mysql Mysql `yaml:"mysql"`
+	S3    S3    `yaml:"s3"`
+	Kafka Kafka `yaml:"kafka"`
+}
+
+type Http struct {
+	Host string `yaml:"host"`
+	Port string `yaml:"port"`
+}
+
+type Redis struct {
+	Host     string `yaml:"host"`
+	Port     string `yaml:"port"`
+	Password string `yaml:"password"`
+	Database int    `yaml:"database"`
+}
+
+type Mysql struct {
+	User     string `yaml:"user"`
+	Host     string `yaml:"host"`
+	Port     string `yaml:"port"`
+	Password string `yaml:"password"`
+	Database string `yaml:"database"`
+}
+
+type S3 struct {
+	AccessKey string `yaml:"accesskey"`
+	SecretKey string `yaml:"secretkey"`
+	Region    string `yaml:"region"`
+	Bucket    string `yaml:"bucket"`
+}
+
+type Kafka struct {
+	Brokers []string `yaml:"brokers"`
 }
 
 var (
