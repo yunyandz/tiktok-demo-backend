@@ -9,9 +9,14 @@ redis:
 mysql:
   host: localhost
   port: 3306
-  user: root
-  password: 1
+  user: tiktok
+  password: tiktok
   database: tiktok
+s3:
+  accesskey:
+  secretkey:
+  bucket:
+  region:
 kafka:
   brokers:
     - localhost:9092

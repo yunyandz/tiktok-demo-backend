@@ -36,10 +36,10 @@ type Mysql struct {
 }
 
 type S3 struct {
+	Endpoint  string `yaml:"endpoint"`
 	AccessKey string `yaml:"accesskey"`
 	SecretKey string `yaml:"secretkey"`
 	Region    string `yaml:"region"`
-	Bucket    string `yaml:"bucket"`
 }
 
 type Kafka struct {

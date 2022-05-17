@@ -1,14 +1,14 @@
 package model
 
 import (
-	"github.com/go-redis/redis"
+	"github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
 )
 
 type Video struct {
 	gorm.Model
 
-	Author User `gorm:"many2many:user_videos"`
+	AuthorID uint64 `gorm:"column:author_id"`
 
 	Title       string `gorm:"size:128"`
 	Description string `gorm:"size:1024"`
@@ -36,9 +36,16 @@ func NewVideoModel(db *gorm.DB, rdb *redis.Client) *VideoModel {
 	}
 }
 
-// 创建一个新的视频，注意：这里不需要检查用户是否存在
+// 创建一个新的视频。
 func (v *VideoModel) CreateVideo(video *Video) error {
 	if err := v.db.Create(video).Error; err != nil {
+		return err
+	}
+	var user User
+	if err := v.db.First(&user, video.AuthorID).Error; err != nil {
+		return err
+	}
+	if err := v.db.Model(&user).Association("Videos").Append(video); err != nil {
 		return err
 	}
 	return nil
