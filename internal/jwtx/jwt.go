@@ -3,8 +3,9 @@ package jwtx
 import (
 	"github.com/yunyandz/tiktok-demo-backend/internal/errorx"
 
-	"github.com/yunyandz/tiktok-demo-backend/internal/logger"
 	"time"
+
+	"github.com/yunyandz/tiktok-demo-backend/internal/logger"
 
 	"github.com/dgrijalva/jwt-go"
 )
@@ -15,15 +16,20 @@ const (
 	SIGNED_KEY   = "666666"
 )
 
-type UserClaims struct {
+type UserInfo struct {
 	Username string `json:"username"`
+	UserID   uint64 `json:"user_id"`
+}
+
+type UserClaims struct {
+	UserInfo
 	jwt.StandardClaims
 }
 
-func CreateUserClaims(username string) (string, error) {
+func CreateUserClaims(uinfo UserInfo) (string, error) {
 	// Create the Claims
 	claims := UserClaims{
-		username,
+		uinfo,
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Second * EXPIRES_TIME).Unix(),
 			Issuer:    ISSUER,
@@ -39,6 +45,7 @@ func CreateUserClaims(username string) (string, error) {
 	return ss, err
 }
 
+// ParseUserClaims parse jwt token and return user claims
 func ParseUserClaims(tokenString string) (*UserClaims, error) {
 
 	token, err := jwt.ParseWithClaims(tokenString, &UserClaims{}, func(t *jwt.Token) (interface{}, error) {

@@ -1,4 +1,4 @@
-package service
+package service_test
 
 import (
 	"strconv"
@@ -9,19 +9,29 @@ import (
 	"github.com/yunyandz/tiktok-demo-backend/internal/dao/mysql"
 	"github.com/yunyandz/tiktok-demo-backend/internal/dao/redis"
 	"github.com/yunyandz/tiktok-demo-backend/internal/logger"
+	"github.com/yunyandz/tiktok-demo-backend/internal/service"
 )
 
-var UserTestSvr *Service
+var UserTestSvr *service.Service
 
 func init() {
-	cfg, err := config.Phase()
-	if err != nil {
-		panic(err)
+	cfg := config.Config{
+		Mysql: config.Mysql{
+			Host:     "localhost",
+			Port:     "3306",
+			User:     "tiktok",
+			Password: "tiktok",
+			Database: "tiktok",
+		},
+		Redis: config.Redis{
+			Host: "localhost",
+			Port: "6379",
+		},
 	}
-	mylogger := logger.New(cfg)
-	db := mysql.New(cfg, mylogger)
-	rds := redis.New(cfg)
-	UserTestSvr = New(db, rds, mylogger, nil)
+	mylogger := logger.New(&cfg)
+	db := mysql.New(&cfg, mylogger)
+	rds := redis.New(&cfg)
+	UserTestSvr = service.New(&cfg, db, rds, mylogger, nil, nil)
 }
 
 func TestService_Register(t *testing.T) {
