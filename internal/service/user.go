@@ -16,8 +16,8 @@ type User struct {
 
 	ID            uint64 `json:"id"`
 	Username      string `json:"name"`
-	FollowCount   int64  `json:"follow-count"`
-	FollowerCount int64  `json:"follower-count"`
+	FollowCount   int64  `json:"follow_count"`
+	FollowerCount int64  `json:"follower_count"`
 	IsFollow      bool   `json:"is_follow"`
 }
 
