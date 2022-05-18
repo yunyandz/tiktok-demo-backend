@@ -14,6 +14,9 @@ import (
 )
 
 func Run(config *config.Config, controller *controller.Controller, logger *zap.Logger) {
+	if !config.Debug {
+		gin.SetMode(gin.ReleaseMode)
+	}
 	r := gin.Default()
 
 	r.Use(ginzap.Ginzap(logger, time.RFC3339, true))
