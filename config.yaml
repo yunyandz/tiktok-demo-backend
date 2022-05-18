@@ -1,3 +1,4 @@
+debug: true
 http:
   host: localhost
   port: 8080
@@ -13,10 +14,12 @@ mysql:
   password: tiktok
   database: tiktok
 s3:
+  vaild: false
   accesskey:
   secretkey:
   bucket:
   region:
 kafka:
+  vaild: false
   brokers:
     - localhost:9092
