@@ -13,6 +13,9 @@ var (
 )
 
 func NewProducer(cfg *config.Config) sarama.AsyncProducer {
+	if !cfg.Kafka.Vaild {
+		return nil
+	}
 	producerOnce.Do(func() {
 		config := sarama.NewConfig()
 		config.Producer.Return.Successes = true

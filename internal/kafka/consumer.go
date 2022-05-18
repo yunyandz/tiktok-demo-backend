@@ -13,6 +13,9 @@ var (
 )
 
 func NewComsumer(cfg *config.Config) sarama.Consumer {
+	if !cfg.Kafka.Vaild {
+		return nil
+	}
 	comsumerOnce.Do(func() {
 		var err error
 		config := sarama.NewConfig()
