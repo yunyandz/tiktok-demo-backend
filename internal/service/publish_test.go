@@ -1,6 +1,7 @@
 package service_test
 
 import (
+	"context"
 	"os"
 	"testing"
 
@@ -69,7 +70,7 @@ func TestService_PublishVideo(t *testing.T) {
 
 	for i := 0; i < 10; i++ {
 		// TODO: 不明原因的空指针错误导致mocks3api不能预期运作
-		response := PublishTestService.PublishVideo(uid, filename, testvideo)
+		response := PublishTestService.PublishVideo(context.TODO(), uid, filename, testvideo)
 		if response.StatusCode != 0 {
 			t.Fatalf("an error '%s' was not expected when opening example video", response.StatusMsg)
 		}

@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -9,9 +10,10 @@ import (
 )
 
 func (ctl *Controller) Publish(c *gin.Context) {
-	token := c.Query("token")
+	token := c.PostForm("token")
 	uc, err := jwtx.ParseUserClaims(token)
 	if err != nil {
+		ctl.logger.Sugar().Errorf("ParseUserClaims error: %v", err)
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"status": -1,
 			"msg":    err.Error(),
@@ -20,6 +22,7 @@ func (ctl *Controller) Publish(c *gin.Context) {
 	}
 	data, err := c.FormFile("data")
 	if err != nil {
+		ctl.logger.Sugar().Errorf("FormFile error: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status": -1,
 			"msg":    err.Error(),
@@ -27,7 +30,15 @@ func (ctl *Controller) Publish(c *gin.Context) {
 		return
 	}
 	file, err := data.Open()
-	ctl.service.PublishVideo(uc.UserID, data.Filename, file)
+	if err != nil {
+		ctl.logger.Sugar().Errorf("data.Open error: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status": -1,
+			"msg":    err.Error(),
+		})
+		return
+	}
+	ctl.service.PublishVideo(context.Background(), uc.UserID, data.Filename, file)
 	c.JSON(http.StatusOK, service.Response{
 		StatusCode: 0,
 	})
