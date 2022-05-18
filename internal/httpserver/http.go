@@ -2,16 +2,24 @@ package httpserver
 
 import (
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/yunyandz/tiktok-demo-backend/internal/config"
 	"github.com/yunyandz/tiktok-demo-backend/internal/controller"
 	"github.com/yunyandz/tiktok-demo-backend/internal/httpserver/router"
+
+	ginzap "github.com/gin-contrib/zap"
 	"go.uber.org/zap"
 )
 
 func Run(config *config.Config, controller *controller.Controller, logger *zap.Logger) {
+	if !config.Debug {
+		gin.SetMode(gin.ReleaseMode)
+	}
 	r := gin.Default()
+
+	r.Use(ginzap.Ginzap(logger, time.RFC3339, true))
 
 	router.InitRouter(r, controller)
 
