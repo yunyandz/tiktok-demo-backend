@@ -31,6 +31,7 @@ func CreateUserClaims(uinfo UserInfo) (string, error) {
 	claims := UserClaims{
 		uinfo,
 		jwt.StandardClaims{
+			IssuedAt:  time.Now().Unix(),
 			ExpiresAt: time.Now().Add(time.Second * EXPIRES_TIME).Unix(),
 			Issuer:    ISSUER,
 		},
