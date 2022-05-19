@@ -19,7 +19,7 @@ func InitRouter(r *gin.Engine, ctl *controller.Controller) {
 	apiRouter.GET("/user", middleware.JWTAuth(), ctl.UserInfo)
 	apiRouter.POST("/user/register", ctl.Register)
 	apiRouter.POST("/user/login", ctl.Login)
-	apiRouter.POST("/publish/action/", ctl.Publish)
+	apiRouter.POST("/publish/action/", middleware.JWTAuth(), ctl.Publish)
 	apiRouter.GET("/publish/list/", ctl.PublishList)
 
 	// extra apis - I
