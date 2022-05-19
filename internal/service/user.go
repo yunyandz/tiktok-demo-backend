@@ -118,12 +118,52 @@ func (s *Service) Login(username string, password string) (*UserLoginResponse, e
 	return &rsp, nil
 }
 
-func (s *Service) Follow(UserID uint64, to_UserID uint64) Response {
-	return Response{}
+func (s *Service) Follow(userId uint64, to_userId uint64) Response {
+	userModel := model.NewUserModel(s.db, s.rds)
+	err := userModel.CreateFollow(userId, to_userId)
+	if err != nil {
+		return Response{StatusCode: 1, StatusMsg: err.Error()}
+	}
+	return Response{StatusCode: 0, StatusMsg: "Follow succeed"}
 }
 
-func (s *Service) GetFollowList(UserID uint64) UserListResponse {
-	return UserListResponse{}
+func (s *Service) UnFollow(userId uint64, to_userId uint64) Response {
+	userModel := model.NewUserModel(s.db, s.rds)
+	err := userModel.DeleteFollow(userId, to_userId)
+	if err != nil {
+		return Response{StatusCode: 1, StatusMsg: err.Error()}
+	}
+	return Response{StatusCode: 0, StatusMsg: "UnFollow succeed"}
+}
+
+func (s *Service) GetFollowList(userId uint64) UserListResponse {
+	userModel := model.NewUserModel(s.db, s.rds)
+	followList, err := userModel.GetFollowList(userId)
+	if err != nil {
+		return UserListResponse{
+			Response: Response{
+				StatusCode: 1,
+				StatusMsg:  err.Error(),
+			},
+		}
+	}
+	var users []User
+	var user *User
+	for _, item := range followList {
+		user = &User{}
+		user.ID = uint64(item.ID)
+		user.Username = item.Username
+		user.FollowCount = item.FollowCount
+		user.FollowerCount = item.FollowerCount
+		user.IsFollow = true
+		users = append(users, *user)
+	}
+	return UserListResponse{
+		Response: Response{
+			StatusCode: 0,
+		},
+		UserList: users,
+	}
 }
 
 func (s *Service) GetFollowerList(UserID uint64) UserListResponse {
