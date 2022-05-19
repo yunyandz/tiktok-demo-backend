@@ -28,13 +28,13 @@ type UserListResponse struct {
 
 type UserLoginResponse struct {
 	Response
-	UserId uint64 `json:"user_id,omitempty"`
+	UserID uint64 `json:"user_id,omitempty"`
 	Token  string `json:"token"`
 }
 
 type UserRegisterResponse struct {
 	Response
-	UserId uint64 `json:"user_id,omitempty"`
+	UserID uint64 `json:"user_id,omitempty"`
 	Token  string `json:"token"`
 }
 
@@ -66,7 +66,10 @@ func (s *Service) Register(username string, password string) (*UserRegisterRespo
 		return nil, errorx.ErrInternalBusy
 	}
 
-	token, err := jwtx.CreateUserClaims(username)
+	token, err := jwtx.CreateUserClaims(jwtx.UserInfo{
+		Username: username,
+		UserID:   uint64(id),
+	})
 	if err != nil {
 		logger.Suger().Errorw("Register CreateUserClaims failed", "err", err.Error())
 		return nil, errorx.ErrInternalBusy
@@ -76,7 +79,7 @@ func (s *Service) Register(username string, password string) (*UserRegisterRespo
 		StatusCode: 0,
 		StatusMsg:  "ok",
 	}
-	res.UserId = id
+	res.UserID = id
 	res.Token = token
 
 	return &res, nil
@@ -94,19 +97,21 @@ func (s *Service) Login(username string, password string) (*UserLoginResponse, e
 		return nil, errorx.ErrUserPassword
 	}
 
-	token, err := jwtx.CreateUserClaims(username)
+	token, err := jwtx.CreateUserClaims(jwtx.UserInfo{
+		Username: username,
+		UserID:   uint64(user.ID),
+	})
 	if err != nil {
 		logger.Suger().Errorw("Login CreateUserClaims failed", "err", err.Error())
 		return nil, errorx.ErrInternalBusy
 	}
 
-	var rsp UserLoginResponse
-	rsp = UserLoginResponse{
+	rsp := UserLoginResponse{
 		Response: Response{
 			StatusCode: 0,
 			StatusMsg:  "ok",
 		},
-		UserId: uint64(user.ID),
+		UserID: uint64(user.ID),
 		Token:  token,
 	}
 
@@ -161,13 +166,13 @@ func (s *Service) GetFollowList(userId uint64) UserListResponse {
 	}
 }
 
-func (s *Service) GetFollowerList(userId uint64) UserListResponse {
+func (s *Service) GetFollowerList(UserID uint64) UserListResponse {
 	return UserListResponse{}
 }
 
-func (s *Service) GetUserInfo(userId uint64) (*UserResponse, error) {
+func (s *Service) GetUserInfo(UserID uint64) (*UserResponse, error) {
 	userModel := model.NewUserModel(s.db, s.rds)
-	user, err := userModel.GetUser(userId)
+	user, err := userModel.GetUser(UserID)
 	if err != nil {
 		return nil, errorx.ErrUserDoesNotExists
 	}
@@ -175,8 +180,7 @@ func (s *Service) GetUserInfo(userId uint64) (*UserResponse, error) {
 	// TODO 需要查follow表
 	// favoriteModel.IsFollow()
 
-	var rsp UserResponse
-	rsp = UserResponse{
+	rsp := UserResponse{
 		Response: Response{
 			StatusCode: 0,
 			StatusMsg:  "ok",

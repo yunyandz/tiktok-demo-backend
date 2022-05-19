@@ -9,6 +9,7 @@ import (
 
 func (ctl *Controller) CommentAction(c *gin.Context) {
 	// token := c.Query("token")
+	// sddddd
 
 	c.JSON(http.StatusOK, service.Response{StatusCode: 0})
 }

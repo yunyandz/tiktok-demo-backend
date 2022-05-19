@@ -1,20 +1,27 @@
 package jwtx
 
 import (
-	"github.com/stretchr/testify/require"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestCreateUserClaims(t *testing.T) {
-	token, err := CreateUserClaims("hello world")
+	token, err := CreateUserClaims(UserInfo{
+		Username: "yongteng",
+		UserID:   114514,
+	})
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
 }
 
 func TestParseUserClaims(t *testing.T) {
 	username := "yongteng"
-	token, err := CreateUserClaims(username)
+	token, err := CreateUserClaims(UserInfo{
+		Username: "yongteng",
+		UserID:   114514,
+	})
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
 

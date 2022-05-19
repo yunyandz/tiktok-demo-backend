@@ -1,19 +1,19 @@
 package model
 
 import (
-	"github.com/go-redis/redis"
+	"github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
 )
 
 type Video struct {
 	gorm.Model
 
-	Author User `gorm:"many2many:user_videos"`
+	AuthorID uint64 `gorm:"column:author_id"`
 
 	Title       string `gorm:"size:128"`
 	Description string `gorm:"size:1024"`
-	Playurl     string `gorm:"size:256"`
-	Coverurl    string `gorm:"size:256"`
+	Playurl     string `gorm:"size:1024"`
+	Coverurl    string `gorm:"size:1024"`
 
 	Commentcount uint64
 	Likecount    uint64
@@ -36,17 +36,31 @@ func NewVideoModel(db *gorm.DB, rdb *redis.Client) *VideoModel {
 	}
 }
 
-// 创建一个新的视频，注意：这里不需要检查用户是否存在
-func (v *VideoModel) CreateVideo(video *Video) error {
-	if err := v.db.Create(video).Error; err != nil {
-		return err
+// 创建一个新的视频。
+func (v *VideoModel) CreateVideo(video *Video) (uint64, error) {
+	//事务
+	err := v.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(video).Error; err != nil {
+			return err
+		}
+		var user User
+		if err := tx.First(&user, video.AuthorID).Error; err != nil {
+			return err
+		}
+		if err := tx.Model(&user).Association("Videos").Append(video); err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		return 0, err
 	}
-	return nil
+	return uint64(video.ID), nil
 }
 
 // 更新视频的播放地址，通常用于视频上传完成后
-func (u *VideoModel) UpdateVideoPlayUrl(id uint64, playUrl string) error {
-	if err := u.db.Exec("update videos set play_url = ? where id = ?", playUrl, id).Error; err != nil {
+func (u *VideoModel) UpdateVideo(id uint64, playurl string) error {
+	if err := u.db.Model(&Video{}).Where("id = ?", id).Update("playurl", playurl).Error; err != nil {
 		return err
 	}
 	return nil

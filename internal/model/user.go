@@ -51,7 +51,6 @@ func (u *UserModel) GetUserByName(username string) (*User, error) {
 }
 
 func (u *UserModel) CreateUser(user *User) (id uint64, err error) {
-
 	err = u.db.Model(&User{}).Save(user).Error
 
 	return uint64(user.ID), err
