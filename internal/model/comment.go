@@ -27,3 +27,17 @@ func (v *VideoModel) CreateComment(videoId uint64, userId uint64, content string
 	}
 	return nil
 }
+
+// 使用Create创建一条评论
+func (v *VideoModel) CreateAComment(videoId uint64, userId uint64, content string) error {
+	comment := Comment{UserID: userId, VideoID: videoId, Content: content}
+	result := v.db.Create(&comment)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
+
+// gorm.Model包含deletedat字段，可以软删除
+// 调用Delete后，记录仍存在但无法查询到
+// deletedat -> “删除”时间
