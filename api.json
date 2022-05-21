@@ -1,0 +1,1233 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+      "title": "抖音极简版——接口",
+      "description": "",
+      "version": "1.0.0"
+    },
+    "tags": [
+      {
+        "name": "基础接口"
+      },
+      {
+        "name": "扩展接口-Ⅰ"
+      },
+      {
+        "name": "扩展接口-Ⅱ"
+      }
+    ],
+    "paths": {
+      "/douyin/relation/action/": {
+        "post": {
+          "summary": "关注操作",
+          "x-apifox-folder": "扩展接口-Ⅱ",
+          "x-apifox-status": "developing",
+          "deprecated": false,
+          "description": "",
+          "tags": [
+            "扩展接口-Ⅱ"
+          ],
+          "parameters": [
+            {
+              "name": "user_id",
+              "in": "query",
+              "description": "",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "token",
+              "in": "query",
+              "description": "",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "to_user_id",
+              "in": "query",
+              "description": "",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "action_type",
+              "in": "query",
+              "description": "",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "成功",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/%E5%9F%BA%E7%A1%80%E6%8E%A5%E5%8F%A3"
+                  },
+                  "examples": {}
+                }
+              }
+            }
+          }
+        }
+      },
+      "/douyin/user/": {
+        "get": {
+          "summary": "用户信息",
+          "x-apifox-folder": "基础接口",
+          "x-apifox-status": "developing",
+          "deprecated": false,
+          "description": "获取登录用户的 id、昵称，如果实现社交部分的功能，还会返回关注数和粉丝数",
+          "tags": [
+            "基础接口"
+          ],
+          "parameters": [
+            {
+              "name": "user_id",
+              "in": "query",
+              "description": "用户id",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "token",
+              "in": "query",
+              "description": "用户鉴权token",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "成功",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "x-apifox-overrides": {},
+                    "type": "object",
+                    "x-apifox-refs": {
+                      "01G31PMH2K2SB7S97X50FZ4XCC": {
+                        "$ref": "#/components/schemas/基础接口",
+                        "x-apifox-overrides": {}
+                      }
+                    },
+                    "properties": {
+                      "status_code": {
+                        "description": "状态码，0-成功，其他值-失败",
+                        "type": "integer"
+                      },
+                      "status_msg": {
+                        "description": "返回状态描述",
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "user": {
+                        "$ref": "#/components/schemas/%E7%94%A8%E6%88%B7"
+                      }
+                    },
+                    "required": [
+                      "status_code",
+                      "status_msg",
+                      "user"
+                    ],
+                    "x-apifox-orders": [
+                      "01G31PMH2K2SB7S97X50FZ4XCC",
+                      "user"
+                    ],
+                    "x-apifox-ignore-properties": [
+                      "status_code",
+                      "status_msg"
+                    ]
+                  },
+                  "examples": {}
+                }
+              }
+            }
+          }
+        }
+      },
+      "/douyin/favorite/action/": {
+        "post": {
+          "summary": "赞操作",
+          "x-apifox-folder": "扩展接口-Ⅰ",
+          "x-apifox-status": "developing",
+          "deprecated": false,
+          "description": "登录用户对视频的点赞和取消点赞操作",
+          "tags": [
+            "扩展接口-Ⅰ"
+          ],
+          "parameters": [
+            {
+              "name": "user_id",
+              "in": "query",
+              "description": "用户id",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "token",
+              "in": "query",
+              "description": "用户鉴权token",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "video_id",
+              "in": "query",
+              "description": "视频id",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "action_type",
+              "in": "query",
+              "description": "1-点赞，2-取消点赞",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "成功",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/%E5%9F%BA%E7%A1%80%E6%8E%A5%E5%8F%A3"
+                  },
+                  "examples": {}
+                }
+              }
+            }
+          }
+        }
+      },
+      "/douyin/feed/": {
+        "get": {
+          "summary": "视频流接口",
+          "x-apifox-folder": "基础接口",
+          "x-apifox-status": "developing",
+          "deprecated": false,
+          "description": "不限制登录状态，返回按投稿时间倒序的视频列表，视频数由服务端控制，单次最多30个",
+          "tags": [
+            "基础接口"
+          ],
+          "parameters": [
+            {
+              "name": "latest_time",
+              "in": "query",
+              "description": "\t 可选参数，限制返回视频的最新投稿时间戳，精确到秒，不填表示当前时间",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "token",
+              "in": "query",
+              "description": "用户登录状态下设置",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "成功",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "x-apifox-overrides": {},
+                    "type": "object",
+                    "x-apifox-refs": {
+                      "01G31NKHD35TBH7AQHF2BF0MG0": {
+                        "$ref": "#/components/schemas/基础接口",
+                        "x-apifox-overrides": {}
+                      }
+                    },
+                    "properties": {
+                      "status_code": {
+                        "description": "状态码，0-成功，其他值-失败",
+                        "type": "integer"
+                      },
+                      "status_msg": {
+                        "description": "返回状态描述",
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "next_time": {
+                        "description": "本次返回的视频中，发布最早的时间，作为下次请求时的latest_time",
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "video_list": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "x-apifox-refs": {
+                            "01G31NQT7GHPE19HDKCQ7ZAXFM": {
+                              "$ref": "#/components/schemas/视频",
+                              "x-apifox-overrides": {}
+                            }
+                          },
+                          "properties": {
+                            "id": {
+                              "type": "integer",
+                              "title": "",
+                              "description": "视频唯一标识"
+                            },
+                            "author": {
+                              "$ref": "#/components/schemas/%E7%94%A8%E6%88%B7"
+                            },
+                            "play_url": {
+                              "type": "string",
+                              "description": "视频播放地址"
+                            },
+                            "cover_url": {
+                              "type": "string",
+                              "description": "视频封面地址"
+                            },
+                            "favorite_count": {
+                              "type": "integer",
+                              "description": "视频的点赞总数"
+                            },
+                            "comment_count": {
+                              "type": "integer",
+                              "description": "视频的评论总数"
+                            },
+                            "is_favorite": {
+                              "type": "boolean",
+                              "description": "true-已点赞，false-未点赞"
+                            }
+                          },
+                          "x-apifox-orders": [
+                            "01G31NQT7GHPE19HDKCQ7ZAXFM"
+                          ],
+                          "x-apifox-ignore-properties": [
+                            "id",
+                            "author",
+                            "play_url",
+                            "cover_url",
+                            "favorite_count",
+                            "comment_count",
+                            "is_favorite"
+                          ]
+                        },
+                        "nullable": true
+                      }
+                    },
+                    "required": [
+                      "status_code",
+                      "status_msg",
+                      "next_time",
+                      "video_list"
+                    ],
+                    "x-apifox-orders": [
+                      "01G31NKHD35TBH7AQHF2BF0MG0",
+                      "next_time",
+                      "video_list"
+                    ],
+                    "x-apifox-ignore-properties": [
+                      "status_code",
+                      "status_msg"
+                    ]
+                  },
+                  "examples": {}
+                }
+              }
+            }
+          }
+        }
+      },
+      "/douyin/favorite/list/": {
+        "get": {
+          "summary": "点赞列表",
+          "x-apifox-folder": "扩展接口-Ⅰ",
+          "x-apifox-status": "developing",
+          "deprecated": false,
+          "description": "登录用户的所有点赞视频",
+          "tags": [
+            "扩展接口-Ⅰ"
+          ],
+          "parameters": [
+            {
+              "name": "token",
+              "in": "query",
+              "description": "用户鉴权token",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "user_id",
+              "in": "query",
+              "description": "用户id",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "成功",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "x-apifox-overrides": {},
+                    "type": "object",
+                    "x-apifox-refs": {
+                      "01G31PVDGDGY0RYTY64RF4XMY1": {
+                        "$ref": "#/components/schemas/基础接口",
+                        "x-apifox-overrides": {}
+                      }
+                    },
+                    "properties": {
+                      "status_code": {
+                        "description": "状态码，0-成功，其他值-失败",
+                        "type": "integer"
+                      },
+                      "status_msg": {
+                        "description": "返回状态描述",
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "video_list": {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/components/schemas/%E8%A7%86%E9%A2%91"
+                        },
+                        "nullable": true
+                      }
+                    },
+                    "required": [
+                      "status_code",
+                      "status_msg",
+                      "video_list"
+                    ],
+                    "x-apifox-orders": [
+                      "01G31PVDGDGY0RYTY64RF4XMY1",
+                      "video_list"
+                    ],
+                    "x-apifox-ignore-properties": [
+                      "status_code",
+                      "status_msg"
+                    ]
+                  },
+                  "examples": {}
+                }
+              }
+            }
+          }
+        }
+      },
+      "/douyin/comment/action/": {
+        "post": {
+          "summary": "评论操作",
+          "x-apifox-folder": "扩展接口-Ⅰ",
+          "x-apifox-status": "developing",
+          "deprecated": false,
+          "description": "登录用户对视频进行评论",
+          "tags": [
+            "扩展接口-Ⅰ"
+          ],
+          "parameters": [
+            {
+              "name": "user_id",
+              "in": "query",
+              "description": "用户id",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "token",
+              "in": "query",
+              "description": "用户鉴权token",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "video_id",
+              "in": "query",
+              "description": "视频id",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "action_type",
+              "in": "query",
+              "description": "1-发布评论，2-删除评论",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "comment_text",
+              "in": "query",
+              "description": "用户填写的评论内容，在action_type=1的时候使用",
+              "required": false,
+              "example": "",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "comment_id",
+              "in": "query",
+              "description": "要删除的评论id，在action_type=2的时候使用",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "成功",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/%E5%9F%BA%E7%A1%80%E6%8E%A5%E5%8F%A3"
+                  },
+                  "examples": {}
+                }
+              }
+            }
+          }
+        }
+      },
+      "/douyin/user/register/": {
+        "post": {
+          "summary": "用户注册",
+          "x-apifox-folder": "基础接口",
+          "x-apifox-status": "developing",
+          "deprecated": false,
+          "description": "新用户注册时提供用户名，密码，昵称即可，用户名需要保证唯一。创建成功后返回用户 id 和权限token",
+          "tags": [
+            "基础接口"
+          ],
+          "parameters": [
+            {
+              "name": "username",
+              "in": "query",
+              "description": "注册用户名，最长32个字符",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "password",
+              "in": "query",
+              "description": "密码，最长32个字符",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "成功",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "x-apifox-overrides": {},
+                    "type": "object",
+                    "x-apifox-refs": {
+                      "01G31NJCX75GRA1ZQZ4KQV1346": {
+                        "$ref": "#/components/schemas/基础接口",
+                        "x-apifox-overrides": {}
+                      }
+                    },
+                    "properties": {
+                      "status_code": {
+                        "description": "状态码，0-成功，其他值-失败",
+                        "type": "integer"
+                      },
+                      "status_msg": {
+                        "description": "返回状态描述",
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "user_id": {
+                        "type": "integer"
+                      },
+                      "token": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "status_code",
+                      "status_msg",
+                      "user_id",
+                      "token"
+                    ],
+                    "x-apifox-orders": [
+                      "01G31NJCX75GRA1ZQZ4KQV1346",
+                      "user_id",
+                      "token"
+                    ],
+                    "x-apifox-ignore-properties": [
+                      "status_code",
+                      "status_msg"
+                    ]
+                  },
+                  "examples": {}
+                }
+              }
+            }
+          }
+        }
+      },
+      "/douyin/user/login/": {
+        "post": {
+          "summary": "用户登录",
+          "x-apifox-folder": "基础接口",
+          "x-apifox-status": "developing",
+          "deprecated": false,
+          "description": "通过用户名和密码进行登录，登录成功后返回用户 id 和权限 token",
+          "tags": [
+            "基础接口"
+          ],
+          "parameters": [
+            {
+              "name": "username",
+              "in": "query",
+              "description": "登录用户名",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "password",
+              "in": "query",
+              "description": "登录密码",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "成功",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "x-apifox-overrides": {},
+                    "type": "object",
+                    "x-apifox-refs": {
+                      "01G31PFHYBQQJCT0WYVFJ9ASBB": {
+                        "$ref": "#/components/schemas/基础接口",
+                        "x-apifox-overrides": {}
+                      }
+                    },
+                    "properties": {
+                      "status_code": {
+                        "description": "状态码，0-成功，其他值-失败",
+                        "type": "integer"
+                      },
+                      "status_msg": {
+                        "description": "返回状态描述",
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "user_id": {
+                        "type": "integer",
+                        "description": "用户id",
+                        "nullable": true
+                      },
+                      "token": {
+                        "description": "用户鉴权token",
+                        "type": "string",
+                        "nullable": true
+                      }
+                    },
+                    "required": [
+                      "status_code",
+                      "status_msg",
+                      "user_id",
+                      "token"
+                    ],
+                    "x-apifox-orders": [
+                      "01G31PFHYBQQJCT0WYVFJ9ASBB",
+                      "user_id",
+                      "token"
+                    ],
+                    "x-apifox-ignore-properties": [
+                      "status_code",
+                      "status_msg"
+                    ]
+                  },
+                  "examples": {}
+                }
+              }
+            }
+          }
+        }
+      },
+      "/douyin/publish/list/": {
+        "get": {
+          "summary": "发布列表",
+          "x-apifox-folder": "基础接口",
+          "x-apifox-status": "developing",
+          "deprecated": false,
+          "description": "登录用户的视频发布列表，直接列出用户所有投稿过的视频",
+          "tags": [
+            "基础接口"
+          ],
+          "parameters": [
+            {
+              "name": "token",
+              "in": "query",
+              "description": "用户鉴权token",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "成功",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "x-apifox-overrides": {},
+                    "type": "object",
+                    "x-apifox-refs": {
+                      "01G31PVDGDGY0RYTY64RF4XMY1": {
+                        "$ref": "#/components/schemas/基础接口",
+                        "x-apifox-overrides": {}
+                      }
+                    },
+                    "properties": {
+                      "status_code": {
+                        "description": "状态码，0-成功，其他值-失败",
+                        "type": "integer"
+                      },
+                      "status_msg": {
+                        "description": "返回状态描述",
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "video_list": {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/components/schemas/%E8%A7%86%E9%A2%91"
+                        },
+                        "nullable": true
+                      }
+                    },
+                    "required": [
+                      "status_code",
+                      "status_msg",
+                      "video_list"
+                    ],
+                    "x-apifox-orders": [
+                      "01G31PVDGDGY0RYTY64RF4XMY1",
+                      "video_list"
+                    ],
+                    "x-apifox-ignore-properties": [
+                      "status_code",
+                      "status_msg"
+                    ]
+                  },
+                  "examples": {}
+                }
+              }
+            }
+          }
+        }
+      },
+      "/douyin/publish/action/": {
+        "post": {
+          "summary": "投稿接口",
+          "x-apifox-folder": "基础接口",
+          "x-apifox-status": "developing",
+          "deprecated": false,
+          "description": "登录用户选择视频上传",
+          "tags": [
+            "基础接口"
+          ],
+          "parameters": [],
+          "requestBody": {
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "string",
+                      "description": "视频数据",
+                      "format": "binary"
+                    },
+                    "token": {
+                      "type": "string",
+                      "description": "用户鉴权token"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "token"
+                  ]
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "成功",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/%E5%9F%BA%E7%A1%80%E6%8E%A5%E5%8F%A3"
+                  },
+                  "examples": {}
+                }
+              }
+            }
+          }
+        }
+      },
+      "/douyin/relation/follower/list/": {
+        "get": {
+          "summary": "粉丝列表",
+          "x-apifox-folder": "扩展接口-Ⅱ",
+          "x-apifox-status": "developing",
+          "deprecated": false,
+          "description": "",
+          "tags": [
+            "扩展接口-Ⅱ"
+          ],
+          "parameters": [
+            {
+              "name": "user_id",
+              "in": "query",
+              "description": "",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "token",
+              "in": "query",
+              "description": "",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "成功",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "x-apifox-overrides": {},
+                    "type": "object",
+                    "x-apifox-refs": {
+                      "01G31QVYRV8ZWZ13HSRB7JSHBQ": {
+                        "$ref": "#/components/schemas/基础接口",
+                        "x-apifox-overrides": {}
+                      }
+                    },
+                    "properties": {
+                      "status_code": {
+                        "description": "状态码，0-成功，其他值-失败",
+                        "type": "integer"
+                      },
+                      "status_msg": {
+                        "description": "返回状态描述",
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "user_list": {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/components/schemas/%E7%94%A8%E6%88%B7"
+                        },
+                        "nullable": true
+                      }
+                    },
+                    "required": [
+                      "status_code",
+                      "status_msg",
+                      "user_list"
+                    ],
+                    "x-apifox-orders": [
+                      "01G31QVYRV8ZWZ13HSRB7JSHBQ",
+                      "user_list"
+                    ],
+                    "x-apifox-ignore-properties": [
+                      "status_code",
+                      "status_msg"
+                    ]
+                  },
+                  "examples": {}
+                }
+              }
+            }
+          }
+        }
+      },
+      "/douyin/relation/follow/list/": {
+        "get": {
+          "summary": "关注列表",
+          "x-apifox-folder": "扩展接口-Ⅱ",
+          "x-apifox-status": "developing",
+          "deprecated": false,
+          "description": "",
+          "tags": [
+            "扩展接口-Ⅱ"
+          ],
+          "parameters": [
+            {
+              "name": "user_id",
+              "in": "query",
+              "description": "",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "token",
+              "in": "query",
+              "description": "",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "成功",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "x-apifox-overrides": {},
+                    "type": "object",
+                    "x-apifox-refs": {
+                      "01G31QVYRV8ZWZ13HSRB7JSHBQ": {
+                        "$ref": "#/components/schemas/基础接口",
+                        "x-apifox-overrides": {}
+                      }
+                    },
+                    "properties": {
+                      "status_code": {
+                        "description": "状态码，0-成功，其他值-失败",
+                        "type": "integer"
+                      },
+                      "status_msg": {
+                        "description": "返回状态描述",
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "user_list": {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/components/schemas/%E7%94%A8%E6%88%B7"
+                        },
+                        "nullable": true
+                      }
+                    },
+                    "required": [
+                      "status_code",
+                      "status_msg",
+                      "user_list"
+                    ],
+                    "x-apifox-orders": [
+                      "01G31QVYRV8ZWZ13HSRB7JSHBQ",
+                      "user_list"
+                    ],
+                    "x-apifox-ignore-properties": [
+                      "status_code",
+                      "status_msg"
+                    ]
+                  },
+                  "examples": {}
+                }
+              }
+            }
+          }
+        }
+      },
+      "/douyin/comment/list/": {
+        "get": {
+          "summary": "评论列表",
+          "x-apifox-folder": "扩展接口-Ⅰ",
+          "x-apifox-status": "developing",
+          "deprecated": false,
+          "description": "查看视频的所有评论，按发布时间倒序",
+          "tags": [
+            "扩展接口-Ⅰ"
+          ],
+          "parameters": [
+            {
+              "name": "token",
+              "in": "query",
+              "description": "用户鉴权token",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "user_id",
+              "in": "query",
+              "description": "用户id",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "video_id",
+              "in": "query",
+              "description": "视频id",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "成功",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "x-apifox-overrides": {},
+                    "type": "object",
+                    "x-apifox-refs": {
+                      "01G31PVDGDGY0RYTY64RF4XMY1": {
+                        "$ref": "#/components/schemas/基础接口",
+                        "x-apifox-overrides": {}
+                      }
+                    },
+                    "properties": {
+                      "status_code": {
+                        "description": "状态码，0-成功，其他值-失败",
+                        "type": "integer"
+                      },
+                      "status_msg": {
+                        "description": "返回状态描述",
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "comment_list": {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/components/schemas/%E8%AF%84%E8%AE%BA"
+                        },
+                        "description": "评论列表",
+                        "nullable": true
+                      }
+                    },
+                    "required": [
+                      "status_code",
+                      "status_msg",
+                      "comment_list"
+                    ],
+                    "x-apifox-orders": [
+                      "01G31PVDGDGY0RYTY64RF4XMY1",
+                      "comment_list"
+                    ],
+                    "x-apifox-ignore-properties": [
+                      "status_code",
+                      "status_msg"
+                    ]
+                  },
+                  "examples": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "schemas": {
+        "用户": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer",
+              "description": "用户id"
+            },
+            "name": {
+              "type": "string",
+              "description": "用户名称"
+            },
+            "follow_count": {
+              "type": "integer",
+              "description": "关注总数"
+            },
+            "follower_count": {
+              "type": "integer",
+              "description": "粉丝总数"
+            },
+            "is_follow": {
+              "type": "boolean",
+              "description": "true-已关注，false-未关注"
+            }
+          },
+          "x-apifox-orders": [
+            "id",
+            "name",
+            "follow_count",
+            "follower_count",
+            "is_follow"
+          ],
+          "required": [
+            "id",
+            "name",
+            "follow_count",
+            "follower_count",
+            "is_follow"
+          ],
+          "description": "用户",
+          "x-apifox-ignore-properties": [],
+          "x-apifox-folder": ""
+        },
+        "基础接口": {
+          "type": "object",
+          "properties": {
+            "status_code": {
+              "description": "状态码，0-成功，其他值-失败",
+              "type": "integer"
+            },
+            "status_msg": {
+              "description": "返回状态描述",
+              "type": "string",
+              "nullable": true
+            }
+          },
+          "x-apifox-orders": [
+            "status_code",
+            "status_msg"
+          ],
+          "required": [
+            "status_code",
+            "status_msg"
+          ],
+          "x-apifox-ignore-properties": [],
+          "x-apifox-folder": ""
+        },
+        "视频": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer",
+              "title": "",
+              "description": "视频唯一标识"
+            },
+            "author": {
+              "$ref": "#/components/schemas/%E7%94%A8%E6%88%B7"
+            },
+            "play_url": {
+              "type": "string",
+              "description": "视频播放地址"
+            },
+            "cover_url": {
+              "type": "string",
+              "description": "视频封面地址"
+            },
+            "favorite_count": {
+              "type": "integer",
+              "description": "视频的点赞总数"
+            },
+            "comment_count": {
+              "type": "integer",
+              "description": "视频的评论总数"
+            },
+            "is_favorite": {
+              "type": "boolean",
+              "description": "true-已点赞，false-未点赞"
+            }
+          },
+          "x-apifox-orders": [
+            "id",
+            "author",
+            "play_url",
+            "cover_url",
+            "favorite_count",
+            "comment_count",
+            "is_favorite"
+          ],
+          "x-apifox-ignore-properties": [],
+          "x-apifox-folder": ""
+        },
+        "评论": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "评论id"
+            },
+            "user": {
+              "$ref": "#/components/schemas/%E7%94%A8%E6%88%B7"
+            },
+            "content": {
+              "type": "string",
+              "description": "评论内容"
+            },
+            "create_date": {
+              "type": "string",
+              "description": "评论发布日期，格式 mm-dd"
+            }
+          },
+          "x-apifox-orders": [
+            "id",
+            "user",
+            "content",
+            "create_date"
+          ],
+          "title": "",
+          "required": [
+            "id",
+            "user",
+            "content",
+            "create_date"
+          ],
+          "x-apifox-ignore-properties": [],
+          "x-apifox-folder": ""
+        }
+      }
+    }
+  }
