@@ -8,29 +8,46 @@ import (
 )
 
 type Config struct {
-	Http struct {
-		Host string `yaml:"host"`
-		Port string `yaml:"port"`
-	} `yaml:"http"`
-	Redis struct {
-		Host     string `yaml:"host"`
-		Port     string `yaml:"port"`
-		Password string `yaml:"password"`
-		Database int    `yaml:"database"`
-	} `yaml:"redis"`
-	Mysql struct {
-		User     string `yaml:"user"`
-		Host     string `yaml:"host"`
-		Port     string `yaml:"port"`
-		Password string `yaml:"password"`
-		Database string `yaml:"database"`
-	} `yaml:"mysql"`
-	S3 struct {
-		AccessKey string `yaml:"accesskey"`
-		SecretKey string `yaml:"secretkey"`
-		Region    string `yaml:"region"`
-		Bucket    string `yaml:"bucket"`
-	} `yaml:"s3"`
+	Debug bool  `yaml:"debug"` // 在DEBUG模式下，会打印更多日志
+	Http  Http  `yaml:"http"`
+	Redis Redis `yaml:"redis"`
+	Mysql Mysql `yaml:"mysql"`
+	S3    S3    `yaml:"s3"`
+	Kafka Kafka `yaml:"kafka"`
+}
+
+type Http struct {
+	Host string `yaml:"host"`
+	Port string `yaml:"port"`
+}
+
+type Redis struct {
+	Host     string `yaml:"host"`
+	Port     string `yaml:"port"`
+	Password string `yaml:"password"`
+	Database int    `yaml:"database"`
+}
+
+type Mysql struct {
+	User     string `yaml:"user"`
+	Host     string `yaml:"host"`
+	Port     string `yaml:"port"`
+	Password string `yaml:"password"`
+	Database string `yaml:"database"`
+}
+
+type S3 struct {
+	Vaild     bool   `yaml:"vaild"` //是否启用s3,如果关闭的话，则不上传视频到s3。
+	Endpoint  string `yaml:"endpoint"`
+	AccessKey string `yaml:"accesskey"`
+	SecretKey string `yaml:"secretkey"`
+	Region    string `yaml:"region"`
+	Bucket    string `yaml:"bucket"`
+}
+
+type Kafka struct {
+	Vaild   bool     `yaml:"vaild"` //是否启用kafka,仅供测试使用
+	Brokers []string `yaml:"brokers"`
 }
 
 var (

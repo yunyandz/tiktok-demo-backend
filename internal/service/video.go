@@ -34,10 +34,6 @@ func (s *Service) Feed(userId uint64, lasttime time.Time) FeedResponse {
 	}
 }
 
-func (s *Service) PublishVideo(userId uint64, video Video) Response {
-	return Response{StatusCode: 0}
-}
-
 func (s *Service) LikeDisliakeVideo(userId uint64, videoId uint64, like bool) Response {
 	rsp := Response{}
 	vid := &model.VideoModel{}
