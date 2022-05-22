@@ -23,8 +23,8 @@ func InitRouter(r *gin.Engine, ctl *controller.Controller) {
 	apiRouter.GET("/publish/list/", ctl.PublishList)
 
 	// extra apis - I
-	apiRouter.POST("/favorite/action/", ctl.FavoriteAction)
-	apiRouter.GET("/favorite/list/", ctl.FavoriteList)
+	apiRouter.POST("/favorite/action/", middleware.JWTAuth(), ctl.FavoriteAction)
+	apiRouter.GET("/favorite/list/", middleware.JWTAuth(), ctl.FavoriteList)
 	apiRouter.POST("/comment/action/", ctl.CommentAction)
 	apiRouter.GET("/comment/list/", ctl.CommentList)
 

@@ -1,6 +1,9 @@
 package service
 
-import "time"
+import (
+	"github.com/yunyandz/tiktok-demo-backend/internal/model"
+	"time"
+)
 
 type Video struct {
 	Id            uint64 `json:"id,omitempty"`
@@ -36,6 +39,22 @@ func (s *Service) PublishVideo(userId uint64, video Video) Response {
 }
 
 func (s *Service) LikeDisliakeVideo(userId uint64, videoId uint64, like bool) Response {
+	rsp := Response{}
+	vid := &model.VideoModel{}
+	if like == true {
+		err := vid.LikeVideo(userId, videoId)
+		if err != nil {
+			rsp.StatusCode = -1
+			rsp.StatusMsg = err.Error()
+			return rsp
+		}
+	}
+	err := vid.UnLikeVideo(userId, videoId)
+	if err != nil {
+		rsp.StatusCode = -1
+		rsp.StatusMsg = err.Error()
+		return rsp
+	}
 	return Response{StatusCode: 0}
 }
 
@@ -47,8 +66,19 @@ func (s *Service) GetVideoList(userId uint64) VideoListResponse {
 }
 
 func (s *Service) GetLikeList(userId uint64) VideoListResponse {
+	// 这儿我蒙了，在哪的API给我调啊
+	vid := &model.VideoModel{}
+	videos, err := vid.GetUserLikeVideos(userId)
+	resvideos := make([]Video, len(videos))
+	// TODO server.Video与Model.Video转换
+	if err != nil {
+		return VideoListResponse{
+			Response:  Response{StatusCode: -1, StatusMsg: err.Error()},
+			VideoList: []Video{},
+		}
+	}
 	return VideoListResponse{
 		Response:  Response{StatusCode: 0},
-		VideoList: []Video{},
+		VideoList: resvideos,
 	}
 }
