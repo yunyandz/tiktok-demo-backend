@@ -10,7 +10,6 @@ type Video struct {
 	FavoriteCount uint32 `json:"favorite_count,omitempty"`
 	CommentCount  uint32 `json:"comment_count,omitempty"`
 	IsFavorite    bool   `json:"is_favorite,omitempty"`
-	Title         string `json:"title,omitempty"`
 }
 
 type FeedResponse struct {
