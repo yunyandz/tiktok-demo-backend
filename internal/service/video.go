@@ -13,6 +13,7 @@ type Video struct {
 	FavoriteCount uint32 `json:"favorite_count,omitempty"`
 	CommentCount  uint32 `json:"comment_count,omitempty"`
 	IsFavorite    bool   `json:"is_favorite,omitempty"`
+	Title         string `json:"title,omitempty"`
 }
 
 type FeedResponse struct {
@@ -36,7 +37,7 @@ func (s *Service) Feed(userId uint64, lasttime time.Time) FeedResponse {
 
 func (s *Service) LikeDisliakeVideo(userId uint64, videoId uint64, like bool) Response {
 	rsp := Response{}
-	vid := &model.VideoModel{}
+	vid := model.NewVideoModel(s.db, s.rds)
 	if like == true {
 		err := vid.LikeVideo(userId, videoId)
 		if err != nil {
@@ -62,11 +63,28 @@ func (s *Service) GetVideoList(userId uint64) VideoListResponse {
 }
 
 func (s *Service) GetLikeList(userId uint64) VideoListResponse {
-	// 这儿我蒙了，在哪的API给我调啊
-	vid := &model.VideoModel{}
+	vid := model.NewVideoModel(s.db, s.rds)
 	videos, err := vid.GetUserLikeVideos(userId)
-	resvideos := make([]Video, len(videos))
-	// TODO server.Video与Model.Video转换
+	// TODO is_follow favorite_count comment_count is_favorite字段未实现实现
+	userModel := model.NewUserModel(s.db, s.rds)
+	var res = make([]Video, len(videos))
+	for i, v := range videos {
+		vid := Video{}
+		vid.Id = uint64(v.ID)
+		vid.PlayUrl = v.Playurl
+		vid.CoverUrl = v.Coverurl
+		vid.Title = v.Title
+		user, err := userModel.GetUser(v.AuthorID)
+		if err != nil {
+			res[i] = Video{}
+			continue
+		}
+		vid.Author.ID = uint64(user.ID)
+		vid.Author.Username = user.Username
+		vid.Author.FollowCount = user.FollowCount
+		vid.Author.FollowerCount = user.FollowerCount
+		res[i] = vid
+	}
 	if err != nil {
 		return VideoListResponse{
 			Response:  Response{StatusCode: -1, StatusMsg: err.Error()},
@@ -75,6 +93,6 @@ func (s *Service) GetLikeList(userId uint64) VideoListResponse {
 	}
 	return VideoListResponse{
 		Response:  Response{StatusCode: 0},
-		VideoList: resvideos,
+		VideoList: res,
 	}
 }
