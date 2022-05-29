@@ -10,7 +10,7 @@ type Video struct {
 	Author        User   `json:"author"`
 	PlayUrl       string `json:"play_url,omitempty"`
 	CoverUrl      string `json:"cover_url,omitempty"`
-	FavoriteCount uint32 `json:"favorite_count,omitempty"`
+	FavoriteCount uint64 `json:"favorite_count,omitempty"`
 	CommentCount  uint32 `json:"comment_count,omitempty"`
 	IsFavorite    bool   `json:"is_favorite,omitempty"`
 	Title         string `json:"title,omitempty"`
@@ -63,9 +63,9 @@ func (s *Service) GetVideoList(userId uint64) VideoListResponse {
 }
 
 func (s *Service) GetLikeList(userId uint64) VideoListResponse {
-	vid := model.NewVideoModel(s.db, s.rds)
-	videos, err := vid.GetUserLikeVideos(userId)
-	// TODO is_follow favorite_count comment_count is_favorite字段未实现实现
+	vido := model.NewVideoModel(s.db, s.rds)
+	videos, err := vido.GetUserLikeVideos(userId)
+	// TODO is_follow comment_count 字段未实现
 	userModel := model.NewUserModel(s.db, s.rds)
 	var res = make([]Video, len(videos))
 	for i, v := range videos {
@@ -74,6 +74,9 @@ func (s *Service) GetLikeList(userId uint64) VideoListResponse {
 		vid.PlayUrl = v.Playurl
 		vid.CoverUrl = v.Coverurl
 		vid.Title = v.Title
+		vid.IsFavorite = vido.IsFavorite(userId, uint64(v.ID))
+		likeCount, err := vido.GetVideoLikesCount(uint64(v.ID))
+		vid.FavoriteCount = uint64(likeCount)
 		user, err := userModel.GetUser(v.AuthorID)
 		if err != nil {
 			res[i] = Video{}

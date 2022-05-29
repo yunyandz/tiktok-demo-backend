@@ -119,10 +119,22 @@ func (v *VideoModel) UnLikeVideo(userId uint64, videoId uint64) error {
 }
 
 // 获取视频的点赞数
-func (v *VideoModel) GetVideoLikesCount(id uint64) (int, error) {
+func (v *VideoModel) GetVideoLikesCount(id uint64) (int64, error) {
 	var count int64
 	if err := v.db.Model(&Video{}).Where("id = ?", id).Count(&count).Error; err != nil {
 		return 0, err
 	}
-	return int(count), nil
+	return count, nil
+}
+
+//查询视频点赞
+func (v *VideoModel) IsFavorite(userId uint64, videoId uint64) bool {
+	var count int64
+	if err := v.db.Exec("select count(*) from likes where user_id = ? and video_id = ?", userId, videoId).Scan(&count).Error; err != nil {
+		return false
+	}
+	if count > 0 {
+		return true
+	}
+	return false
 }
