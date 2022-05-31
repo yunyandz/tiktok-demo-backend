@@ -22,6 +22,7 @@ type Http struct {
 }
 
 type Redis struct {
+	Vaild    bool   `yaml:"vaild"`
 	Host     string `yaml:"host"`
 	Port     string `yaml:"port"`
 	Password string `yaml:"password"`

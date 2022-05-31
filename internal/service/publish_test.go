@@ -69,8 +69,8 @@ func TestService_PublishVideo(t *testing.T) {
 	filename := "bear.mp4"
 
 	for i := 0; i < 10; i++ {
-		// TODO: 不明原因的空指针错误导致mocks3api不能预期运作
-		response := PublishTestService.PublishVideo(context.TODO(), uid, filename, testvideo)
+		// TODO: 设置期望值
+		response := PublishTestService.PublishVideo(context.TODO(), uid, filename, testvideo, "bear.mp4")
 		if response.StatusCode != 0 {
 			t.Fatalf("an error '%s' was not expected when opening example video", response.StatusMsg)
 		}
