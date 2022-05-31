@@ -10,4 +10,6 @@ var (
 	ErrUserAlreadyExists = errors.New("用户已存在")
 	ErrUserDoesNotExists = errors.New("用户不存在")
 	ErrUserPassword      = errors.New("密码错误")
+
+	ErrCommentDoesNotExists = errors.New("评论不存在")
 )
