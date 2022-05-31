@@ -14,6 +14,7 @@ type RealationRequest struct {
 	ActionType int8   `form:"action_type" binding:"required"`
 }
 
+
 const (
 	Follow   = 1
 	UnFollow = 2
@@ -31,7 +32,7 @@ func (ctl *Controller) RelationAction(c *gin.Context) {
 	case Follow:
 		rsp := ctl.service.Follow(req.ToUserId, req.UserId)
 		c.JSON(http.StatusOK, rsp)
-	case UnFollow:
+	case UnFollow：
 		rsp := ctl.service.UnFollow(req.ToUserId, req.UserId)
 		c.JSON(http.StatusOK, rsp)
 	default:
