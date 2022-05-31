@@ -4,8 +4,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yunyandz/tiktok-demo-backend/internal/errorx"
-	"github.com/yunyandz/tiktok-demo-backend/internal/jwtx"
 	"github.com/yunyandz/tiktok-demo-backend/internal/service"
 )
 
@@ -24,25 +22,7 @@ const (
 func (ctl *Controller) RelationAction(c *gin.Context) {
 	// token := c.Query("token")
 	var req RealationRequest
-	token := c.PostForm("token")
-	uc, err := jwtx.ParseUserClaims(token)
-	if err != nil {
-		ctl.logger.Sugar().Errorf("ParseUserClaims error: %v", err)
-		c.JSON(http.StatusUnauthorized, service.Response{
-			StatusCode: -1,
-			StatusMsg:  errorx.ErrInvalidToken.Error(),
-		})
-		return
-	}
-	if uc.UserID != req.UserId {
-		ctl.logger.Sugar().Errorf("user_id not match: %v", err)
-		c.JSON(http.StatusUnauthorized, service.Response{
-			StatusCode: -1,
-			StatusMsg:  errorx.ErrInvalidToken.Error(),
-		})
-		return
-	}
-	err = c.ShouldBind(&req)
+	err := c.ShouldBind(&req)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, service.Response{StatusCode: 1, StatusMsg: err.Error()})
 		return
