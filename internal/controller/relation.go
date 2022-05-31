@@ -4,6 +4,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/yunyandz/tiktok-demo-backend/internal/errorx"
+	"github.com/yunyandz/tiktok-demo-backend/internal/jwtx"
 	"github.com/yunyandz/tiktok-demo-backend/internal/service"
 )
 
@@ -14,19 +16,42 @@ type RealationRequest struct {
 	ActionType int8   `form:"action_type" binding:"required"`
 }
 
+const (
+	Follow   = 1
+	UnFollow = 2
+)
+
 func (ctl *Controller) RelationAction(c *gin.Context) {
 	// token := c.Query("token")
 	var req RealationRequest
-	err := c.ShouldBind(&req)
+	token := c.PostForm("token")
+	uc, err := jwtx.ParseUserClaims(token)
+	if err != nil {
+		ctl.logger.Sugar().Errorf("ParseUserClaims error: %v", err)
+		c.JSON(http.StatusUnauthorized, service.Response{
+			StatusCode: -1,
+			StatusMsg:  errorx.ErrInvalidToken.Error(),
+		})
+		return
+	}
+	if uc.UserID != req.UserId {
+		ctl.logger.Sugar().Errorf("user_id not match: %v", err)
+		c.JSON(http.StatusUnauthorized, service.Response{
+			StatusCode: -1,
+			StatusMsg:  errorx.ErrInvalidToken.Error(),
+		})
+		return
+	}
+	err = c.ShouldBind(&req)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, service.Response{StatusCode: 1, StatusMsg: err.Error()})
 		return
 	}
 	switch req.ActionType {
-	case 1:
+	case Follow:
 		rsp := ctl.service.Follow(req.ToUserId, req.UserId)
 		c.JSON(http.StatusOK, rsp)
-	case 2:
+	case UnFollow:
 		rsp := ctl.service.UnFollow(req.ToUserId, req.UserId)
 		c.JSON(http.StatusOK, rsp)
 	default:
