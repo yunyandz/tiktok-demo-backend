@@ -39,8 +39,9 @@ func (ctl *Controller) Publish(c *gin.Context) {
 		})
 		return
 	}
+	title := c.PostForm("title")
 	// TODO: 判断文件类型是否为视频文件
-	res := ctl.service.PublishVideo(context.Background(), uc.UserID, data.Filename, file)
+	res := ctl.service.PublishVideo(context.Background(), uc.UserID, data.Filename, file, title)
 	c.JSON(http.StatusOK, service.Response{
 		StatusCode: res.StatusCode,
 		StatusMsg:  res.StatusMsg,

@@ -70,7 +70,7 @@ func TestService_PublishVideo(t *testing.T) {
 
 	for i := 0; i < 10; i++ {
 		// TODO: 设置期望值
-		response := PublishTestService.PublishVideo(context.TODO(), uid, filename, testvideo)
+		response := PublishTestService.PublishVideo(context.TODO(), uid, filename, testvideo, "bear.mp4")
 		if response.StatusCode != 0 {
 			t.Fatalf("an error '%s' was not expected when opening example video", response.StatusMsg)
 		}
