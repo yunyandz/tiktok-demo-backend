@@ -12,10 +12,11 @@ import (
 )
 
 // 上传video的部分，上传到s3是异步的，所以这里不需要等待立刻返回
-func (s *Service) PublishVideo(ctx context.Context, UserID uint64, filename string, videodata io.Reader) Response {
+func (s *Service) PublishVideo(ctx context.Context, UserID uint64, filename string, videodata io.Reader, title string) Response {
 	video := model.Video{
 		AuthorID: UserID,
 		Playurl:  "",
+		Title:    title,
 	}
 	vm := model.NewVideoModel(s.db, s.rds)
 	vid, err := vm.CreateVideo(&video)
