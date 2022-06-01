@@ -20,7 +20,7 @@ func main() {
 	}
 	mylogger := logger.New(cfg)
 	db := mysql.New(cfg, mylogger)
-	rds := redis.New(cfg)
+	rds := redis.New(cfg, mylogger)
 	pdc := kafka.NewProducer(cfg)
 	s3 := s3.New(cfg, mylogger)
 	ser := service.New(cfg, db, rds, mylogger, pdc, s3)
