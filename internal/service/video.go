@@ -10,6 +10,7 @@ type Video struct {
 	FavoriteCount uint32 `json:"favorite_count,omitempty"`
 	CommentCount  uint32 `json:"comment_count,omitempty"`
 	IsFavorite    bool   `json:"is_favorite,omitempty"`
+	Title         string `json:"title,omitempty"`
 }
 
 type FeedResponse struct {
@@ -29,10 +30,6 @@ func (s *Service) Feed(userId uint64, lasttime time.Time) FeedResponse {
 		VideoList: []Video{},
 		NextTime:  time.Now().Unix(),
 	}
-}
-
-func (s *Service) PublishVideo(userId uint64, video Video) Response {
-	return Response{StatusCode: 0}
 }
 
 func (s *Service) LikeDisliakeVideo(userId uint64, videoId uint64, like bool) Response {

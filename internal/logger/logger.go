@@ -16,7 +16,12 @@ var (
 // 创建新的logger
 func New(cfg *config.Config) *zap.Logger {
 	once.Do(func() {
-		logger, _ = zap.NewProduction()
+		if !cfg.Debug {
+			logger, _ = zap.NewProduction()
+		} else {
+			logger, _ = zap.NewDevelopment()
+			logger.Debug("running in debug mode...")
+		}
 		suger = logger.Sugar()
 	})
 	return logger

@@ -1,7 +1,9 @@
+debug: true
 http:
   host: localhost
   port: 8080
 redis:
+  vaild: true
   host: localhost
   port: 6379
   db: 0
@@ -9,6 +11,16 @@ redis:
 mysql:
   host: localhost
   port: 3306
-  user: root
-  password: 1
+  user: tiktok
+  password: tiktok
   database: tiktok
+s3:
+  vaild: false
+  accesskey:
+  secretkey:
+  bucket: 
+  region: 
+kafka:
+  vaild: false
+  brokers:
+    - localhost:9092

@@ -12,4 +12,6 @@ var (
 	ErrUserPassword      = errors.New("密码错误")
 
 	ErrCommentDoesNotExists = errors.New("评论不存在")
+	ErrReadVideo            = errors.New("读取视频失败")
+	ErrNotVideo             = errors.New("不是视频文件")
 )
