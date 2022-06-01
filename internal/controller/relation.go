@@ -22,6 +22,10 @@ func (ctl *Controller) RelationAction(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, service.Response{StatusCode: 1, StatusMsg: err.Error()})
 		return
 	}
+	if req.ToUserId == req.UserId {
+		c.JSON(http.StatusOK, service.Response{StatusCode: 1, StatusMsg: "不能对自己继续操作"})
+		return
+	}
 	const Follow = 1
 	const Unfollow = 2
 	switch req.ActionType {
