@@ -31,8 +31,6 @@ func (ctl *Controller) RelationAction(c *gin.Context) {
 		c.JSON(http.StatusOK, service.Response{StatusCode: 1, StatusMsg: "不能对自己进行操作"})
 		return
 	}
-	const Follow = 1
-	const Unfollow = 2
 	switch req.ActionType {
 	case Follow:
 		rsp := ctl.service.Follow(req.ToUserId, req.UserId)
