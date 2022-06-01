@@ -22,11 +22,13 @@ func (ctl *Controller) RelationAction(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, service.Response{StatusCode: 1, StatusMsg: err.Error()})
 		return
 	}
+	const Follow = 1
+	const Unfollow = 2
 	switch req.ActionType {
-	case 1:
+	case Follow:
 		rsp := ctl.service.Follow(req.ToUserId, req.UserId)
 		c.JSON(http.StatusOK, rsp)
-	case 2:
+	case Unfollow:
 		rsp := ctl.service.UnFollow(req.ToUserId, req.UserId)
 		c.JSON(http.StatusOK, rsp)
 	default:
