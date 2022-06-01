@@ -1,7 +1,10 @@
 package model
 
 import (
+	"time"
+
 	"github.com/go-redis/redis/v8"
+	"github.com/yunyandz/tiktok-demo-backend/internal/constant"
 	"gorm.io/gorm"
 )
 
@@ -69,7 +72,16 @@ func (u *VideoModel) UpdateVideo(id uint64, playurl string) error {
 // 获取最新的视频条目，按照时间降序排列，按照文档中的要求，这里只返回前30条
 func (v *VideoModel) GetNewVideos() ([]*Video, error) {
 	var videos []*Video
-	if err := v.db.Limit(30).Find(&videos).Error; err != nil {
+	if err := v.db.Limit(constant.FeedLimit).Find(&videos).Error; err != nil {
+		return nil, err
+	}
+	return videos, nil
+}
+
+// 获取指定时间戳之前创建时间的视频列表。这里依然是最多返回30条。
+func (v *VideoModel) GetVideosBeforeTime(time time.Time) ([]*Video, error) {
+	var videos []*Video
+	if err := v.db.Where("created_at < ?", time).Limit(constant.FeedLimit).Find(&videos).Error; err != nil {
 		return nil, err
 	}
 	return videos, nil
