@@ -60,7 +60,7 @@ func (ctl *Controller) PublishList(c *gin.Context) {
 		})
 		return
 	}
-	r, err := ctl.service.PublicList(context.Background(), uc.UserID)
+	r, err := ctl.service.GetVideoList(context.Background(), uc.UserID)
 	if err != nil {
 		rsp.Response = service.Response{
 			StatusCode: -1,

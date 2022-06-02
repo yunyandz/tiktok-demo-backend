@@ -8,14 +8,20 @@ import (
 	"github.com/yunyandz/tiktok-demo-backend/internal/model"
 )
 
-func (s *Service) getFeed(ctx context.Context, userId uint64, lasttime time.Time) (*VideoListResponse, error) {
+func (s *Service) GetFeed(ctx context.Context, userId uint64, isnew bool, lasttime time.Time) (*VideoListResponse, error) {
 	vm := model.NewVideoModel(s.db, s.rds)
-	videosModel, err := vm.GetNewVideos()
-	userModel := model.NewUserModel(s.db, s.rds)
+	var videosModel []*model.Video
+	var err error
+	if isnew {
+		videosModel, err = vm.GetNewVideos()
+	} else {
+		videosModel, err = vm.GetVideosBeforeTime(lasttime)
+	}
 	if err != nil {
 		s.logger.Sugar().Errorf("get video failed: %s", err.Error())
 		return nil, errorx.ErrUserOffline
 	}
+	userModel := model.NewUserModel(s.db, s.rds)
 	// TODO 封装需要的信息
 	var videos []Video
 	for _, arr := range videosModel {
