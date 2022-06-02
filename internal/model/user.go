@@ -71,10 +71,18 @@ func (u *UserModel) GetFollowList(userId uint64) ([]*User, error) {
 // 获取用户的粉丝列表
 func (u *UserModel) GetFollowerList(userId uint64) ([]*User, error) {
 	var users []*User
-	if err := u.db.Where("id in (select follower_id from followers where user_id = ?)", userId).Find(&users).Error; err != nil {
+	if err := u.db.Where("id in (select follower_id from user_follows where user_id = ?)", userId).Find(&users).Error; err != nil {
 		return nil, err
 	}
 	return users, nil
+}
+
+func (u *UserModel) IsFollow(userId uint64, followerId uint64) bool {
+	var count int64
+	if err := u.db.Model(&User{}).Where("id = ? and id in (select user_id from user_follows where follower_id = ?)", userId, followerId).Count(&count).Error; err != nil {
+		return false
+	}
+	return count > 0
 }
 
 // 关注一个用户

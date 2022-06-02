@@ -67,9 +67,18 @@ func (ctl *Controller) FollowList(c *gin.Context) {
 }
 
 func (ctl *Controller) FollowerList(c *gin.Context) {
-	c.JSON(http.StatusOK, service.UserListResponse{
-		Response: service.Response{
-			StatusCode: 0,
-		},
-	})
+	var req FollowRequest
+	err := c.ShouldBindQuery(&req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, service.UserListResponse{
+			Response: service.Response{
+				StatusCode: 0,
+				StatusMsg:  err.Error(),
+			},
+		})
+		return
+	}
+
+	rsp := ctl.service.GetFollowerList(req.UserId)
+	c.JSON(http.StatusOK, rsp)
 }
