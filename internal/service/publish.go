@@ -2,20 +2,47 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"io"
+	"os"
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/yunyandz/tiktok-demo-backend/internal/errorx"
+	"github.com/go-redis/redis/v8"
+
+	"github.com/yunyandz/tiktok-demo-backend/internal/constant"
 	"github.com/yunyandz/tiktok-demo-backend/internal/model"
+	"github.com/yunyandz/tiktok-demo-backend/internal/util"
 )
 
 // 上传video的部分，上传到s3是异步的，所以这里不需要等待立刻返回
-func (s *Service) PublishVideo(ctx context.Context, UserID uint64, filename string, videodata io.Reader) Response {
+func (s *Service) PublishVideo(ctx context.Context, UserID uint64, filename string, videodata io.Reader, title string) Response {
+	playurl := ""
+	coverurl := ""
+	coverfilename := s.GetCoverFileName(filename)
+	if s.cfg.S3.Vaild {
+		var err error
+		playurl, err = s.PreSignUrl(&filename)
+		if err != nil {
+			return Response{
+				StatusCode: 1,
+				StatusMsg:  err.Error(),
+			}
+		}
+		coverurl, err = s.PreSignUrl(&coverfilename)
+		if err != nil {
+			return Response{
+				StatusCode: 1,
+				StatusMsg:  err.Error(),
+			}
+		}
+	}
 	video := model.Video{
 		AuthorID: UserID,
-		Playurl:  "",
+		Title:    title,
+		Playurl:  playurl,
+		Coverurl: coverurl,
 	}
 	vm := model.NewVideoModel(s.db, s.rds)
 	vid, err := vm.CreateVideo(&video)
@@ -23,91 +50,109 @@ func (s *Service) PublishVideo(ctx context.Context, UserID uint64, filename stri
 		s.logger.Sugar().Errorf("create video failed: %s", err.Error())
 		return Response{StatusCode: 1, StatusMsg: err.Error()}
 	}
+
 	if s.cfg.S3.Vaild {
+		go s.UploadVideoToS3(ctx, filename, videodata)
 		go func() {
-			_, err := s.s3.PutObject(context.TODO(), &s3.PutObjectInput{
-				Bucket:      aws.String(s.cfg.S3.Bucket),
-				Key:         &filename,
-				Body:        videodata,
-				ContentType: aws.String("video/mp4"),
-			})
+			coverdata, err := s.GetCoverFromVideoFile(videodata)
 			if err != nil {
-				s.logger.Sugar().Errorf("upload video to s3 failed: %s", err.Error())
+				s.logger.Sugar().Errorf("get cover from video failed: %s", err.Error())
 				return
 			}
-			if err != nil {
-				s.logger.Sugar().Errorf("presign video to s3 failed: %s", err.Error())
-				return
-			}
-			s.logger.Sugar().Debugf("upload video to s3 success: %s", filename)
-			// 更新video的playurl
-			pr, err := s.s3.PresignGetObject(context.TODO(), &s3.GetObjectInput{
-				Bucket: aws.String(s.cfg.S3.Bucket),
-				Key:    &filename,
-			})
-			if err != nil {
-				s.logger.Sugar().Errorf("presign video to s3 failed: %s", err.Error())
-				return
-			}
-			// 转换为https
-			video.Playurl = strings.Replace(pr.URL, "http://", "https://", 1)
-			if err := vm.UpdateVideo(vid, video.Playurl); err != nil {
-				s.logger.Sugar().Errorf("update video playurl failed: %s", err.Error())
-				return
-			}
-			s.logger.Sugar().Debugf("update video playurl success: %s", video.Playurl)
+			s.logger.Sugar().Debugf("get cover from video success")
+			s.UploadCoverToS3(ctx, coverfilename, coverdata)
 		}()
+	}
+	if s.cfg.Redis.Vaild {
+		go s.PutVideoInfoToRedis(ctx, &video)
 	}
 	s.logger.Sugar().Debugf("create video success: %d", vid)
 	return Response{StatusCode: 0}
 }
 
-/**
-获取用户所有投稿过的视频
-*/
-func (s *Service) PublicList(ctx context.Context, UserID uint64) (*VideoListResponse, error) {
-	vm := model.NewVideoModel(s.db, s.rds)
-	videosModel, err := vm.GetVideosByUser(UserID)
-	userModel := model.NewUserModel(s.db, s.rds)
+func (s *Service) UploadVideoToS3(ctx context.Context, filename string, videodata io.Reader) {
+	s.UploadToS3(ctx, filename, videodata, "video/mp4")
+}
+
+func (s *Service) UploadCoverToS3(ctx context.Context, filename string, coverdata io.Reader) {
+	s.UploadToS3(ctx, filename, coverdata, "image/jpeg")
+}
+
+func (s *Service) UploadToS3(ctx context.Context, filename string, data io.Reader, contenttype string) {
+	_, err := s.s3.PutObject(ctx, &s3.PutObjectInput{
+		Bucket:      aws.String(s.cfg.S3.Bucket),
+		Key:         &filename,
+		Body:        data,
+		ContentType: &contenttype,
+	})
 	if err != nil {
-		s.logger.Sugar().Errorf("get video failed: %s", err.Error())
-		return nil, errorx.ErrUserOffline
+		s.logger.Sugar().Errorf("upload to s3 failed: %s", err.Error())
+		return
 	}
-	// 封装需要的信息
-	var videos []Video
-	for _, arr := range videosModel {
-		var video Video
-		// 根据获取到的authorId去
-		user, err := userModel.GetUser(arr.AuthorID)
-		if err != nil {
-			return nil, errorx.ErrUserDoesNotExists
-		}
-		// 封装一个Video
-		video.Id = uint64(arr.ID)
+	s.logger.Sugar().Debugf("upload to s3 success: %s", filename)
+}
 
-		video.Author.ID = uint64(user.ID)
-		video.Author.Username = user.Username
-		video.Author.FollowCount = user.FollowCount
-		video.Author.FollowerCount = user.FollowerCount
-		// 暂时先设置为false
-		// TODO 需要设置一个SQL查询是否关注
-		video.Author.IsFollow = false
-
-		video.PlayUrl = arr.Playurl
-		video.CoverUrl = arr.Coverurl
-		video.FavoriteCount = uint32(arr.Likecount)
-		video.CommentCount = uint32(arr.Commentcount)
-		video.Title = arr.Title
-
-		videos = append(videos, video)
-
+func (s *Service) PreSignUrl(filename *string) (string, error) {
+	pr, err := s.s3.PresignGetObject(context.TODO(), &s3.GetObjectInput{
+		Bucket: aws.String(s.cfg.S3.Bucket),
+		Key:    filename,
+	})
+	if err != nil {
+		s.logger.Sugar().Errorf("presign url to s3 failed: %s", err.Error())
+		return "", err
 	}
-	rsp := VideoListResponse{
-		Response: Response{
-			StatusCode: 0,
-			StatusMsg:  "ok",
-		},
-		VideoList: videos,
+	//转换为https
+	playurl := strings.Replace(pr.URL, "http://", "https://", 1)
+	s.logger.Sugar().Debugf("presign url to s3 success: %s", playurl)
+	return playurl, nil
+}
+
+func (s *Service) PutVideoInfoToRedis(ctx context.Context, video *model.Video) {
+	su, err := s.GetUserInfo(video.AuthorID)
+	if err != nil {
+		s.logger.Sugar().Errorf("get user info failed: %s", err.Error())
+		return
 	}
-	return &rsp, nil
+	sv := Video{
+		Id:       uint64(video.ID),
+		Author:   su.User,
+		Title:    video.Title,
+		PlayUrl:  video.Playurl,
+		CoverUrl: video.Coverurl,
+	}
+	mb, err := json.Marshal(sv)
+	if err != nil {
+		s.logger.Sugar().Errorf("marshal video failed: %s", err.Error())
+		return
+	}
+	s.rds.ZAdd(ctx, constant.RedisVideoZSetKey, &redis.Z{
+		Score:  float64(video.CreatedAt.Unix()),
+		Member: mb,
+	})
+	s.logger.Sugar().Debugf("create video cache success: %d", video.ID)
+}
+
+func (s *Service) GetCoverFromVideoFile(data io.Reader) (io.Reader, error) {
+	tmpf, err := os.CreateTemp("", "tiktok-*.mp4")
+	if err != nil {
+		s.logger.Sugar().Errorf("create temp file failed: %s", err.Error())
+		return nil, err
+	}
+	defer tmpf.Close()
+	_, err = io.Copy(tmpf, data)
+	if err != nil {
+		s.logger.Sugar().Errorf("copy video data failed: %s", err.Error())
+		return nil, err
+	}
+	coverfile, err := util.ReadFrameAsJpeg(tmpf.Name())
+	if err != nil {
+		s.logger.Sugar().Errorf("read frame as jpeg failed: %s", err.Error())
+		return nil, err
+	}
+	s.logger.Sugar().Debugf("read frame as jpeg success")
+	return coverfile, nil
+}
+
+func (s *Service) GetCoverFileName(filename string) string {
+	return strings.TrimSuffix(filename, ".mp4") + ".jpg"
 }

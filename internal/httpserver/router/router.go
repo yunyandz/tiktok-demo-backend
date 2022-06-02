@@ -3,6 +3,7 @@ package router
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/yunyandz/tiktok-demo-backend/internal/controller"
+	"github.com/yunyandz/tiktok-demo-backend/internal/httpserver/middleware"
 )
 
 func InitRouter(r *gin.Engine, ctl *controller.Controller) {
@@ -13,9 +14,13 @@ func InitRouter(r *gin.Engine, ctl *controller.Controller) {
 
 	// basic apis
 	apiRouter.GET("/feed/", ctl.Feed)
-	apiRouter.GET("/user/", ctl.UserInfo)
-	apiRouter.POST("/user/register/", ctl.Register)
-	apiRouter.POST("/user/login/", ctl.Login)
+
+	// using jwt auth
+	apiRouter.GET("/user", middleware.JWTAuth(), ctl.UserInfo)
+
+	apiRouter.POST("/user/register", ctl.Register)
+	apiRouter.POST("/user/login", ctl.Login)
+
 	apiRouter.POST("/publish/action/", ctl.Publish)
 	apiRouter.GET("/publish/list/", ctl.PublishList)
 
@@ -26,7 +31,7 @@ func InitRouter(r *gin.Engine, ctl *controller.Controller) {
 	apiRouter.GET("/comment/list/", ctl.CommentList)
 
 	// extra apis - II
-	apiRouter.POST("/relation/action/", ctl.RelationAction)
-	apiRouter.GET("/relation/follow/list/", ctl.FollowList)
+	apiRouter.POST("/relation/action/", middleware.JWTAuth(), ctl.RelationAction)
+	apiRouter.GET("/relation/follow/list/", middleware.JWTAuth(), ctl.FollowList)
 	apiRouter.GET("/relation/follower/list/", ctl.FollowerList)
 }

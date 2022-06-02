@@ -7,7 +7,6 @@ type Comment struct {
 
 	UserID  uint64 `gorm:"index"`
 	VideoID uint64 `gorm:"index"`
-
 	Content string `gorm:"size:1024"`
 }
 
@@ -20,10 +19,34 @@ func (v *VideoModel) GetVideoComments(id uint64) ([]*Comment, error) {
 	return comments, nil
 }
 
-// 创建一条评论
-func (v *VideoModel) CreateComment(videoId uint64, userId uint64, content string) error {
-	if err := v.db.Exec("insert into comments (video_id, user_id, content) values (?, ?, ?)", videoId, userId, content).Error; err != nil {
+// 使用Create创建一条评论
+func (v *VideoModel) CreateAComment(videoId uint64, userId uint64, content string) (*Comment, error) {
+	comment := Comment{UserID: userId, VideoID: videoId, Content: content}
+	err := v.db.Create(&comment).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &comment, err
+}
+
+// 查询一条评论
+func (v *VideoModel) FindAComment(commentId uint64) (*Comment, error) {
+	var comment Comment
+	if err := v.db.First(&comment, commentId).Error; err != nil {
+		return nil, err
+	}
+	return &comment, nil
+}
+
+// 删除一个评论
+func (v *VideoModel) DeleteAComment(commentId uint64) error {
+	if err := v.db.Delete(&Comment{}, commentId).Error; err != nil {
 		return err
 	}
 	return nil
 }
+
+// gorm.Model包含deletedat字段，可以软删除
+// 调用Delete后，记录仍存在但无法查询到
+// deletedat -> “删除”时间
