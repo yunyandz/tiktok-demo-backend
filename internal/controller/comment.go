@@ -20,6 +20,11 @@ type CommentActionResponse struct {
 	Comment service.Comment `json:"comment"`
 }
 
+const (
+	CommentActionTypePublish = 1
+	CommentActionTypeDelete  = 2
+)
+
 func (ctl *Controller) CommentAction(c *gin.Context) {
 	// token := c.Query("token")
 	var req CommentActionRequest
@@ -33,19 +38,8 @@ func (ctl *Controller) CommentAction(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, rsp)
 		return
 	}
-
-	// 检查ActionType
-	if req.ActionType != 1 && req.ActionType != 2 {
-		rsp.Response = service.Response{
-			StatusCode: -1,
-			StatusMsg:  "Bad ActionType",
-		}
-		c.JSON(http.StatusBadRequest, rsp)
-		return
-	}
-
-	//发布评论
-	if req.ActionType == 1 {
+	switch req.ActionType {
+	case CommentActionTypePublish:
 		r, err := ctl.service.PublishComment(req.UserID, req.VideoID, req.CommentText)
 		if err != nil {
 			rsp.Response = service.Response{
@@ -58,9 +52,7 @@ func (ctl *Controller) CommentAction(c *gin.Context) {
 		rsp.Response = r.Response
 		rsp.Comment = r.Comment
 		c.JSON(http.StatusOK, rsp)
-	}
-	//删除评论
-	if req.ActionType == 2 {
+	case CommentActionTypeDelete:
 		r, err := ctl.service.DeleteComment(req.CommentID)
 		if err != nil {
 			rsp.Response = service.Response{
@@ -73,6 +65,13 @@ func (ctl *Controller) CommentAction(c *gin.Context) {
 		rsp.Response = r.Response
 		rsp.Comment = r.Comment
 		c.JSON(http.StatusOK, rsp)
+	default:
+		rsp.Response = service.Response{
+			StatusCode: -1,
+			StatusMsg:  "Bad ActionType",
+		}
+		c.JSON(http.StatusBadRequest, rsp)
+		return
 	}
 }
 
