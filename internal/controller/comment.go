@@ -7,15 +7,105 @@ import (
 	"github.com/yunyandz/tiktok-demo-backend/internal/service"
 )
 
+type CommentActionRequest struct {
+	UserID      uint64 `form:"user_id" binding:"required"`
+	Token       string `form:"token" binding:"required"`
+	VideoID     uint64 `form:"video_id" binding:"required"`
+	ActionType  uint64 `form:"action_type" binding:"required"` //
+	CommentText string `form:"comment_text"`
+	CommentID   uint64 `form:"comment_id"`
+}
+type CommentActionResponse struct {
+	service.Response
+	Comment service.Comment `json:"comment"`
+}
+
 func (ctl *Controller) CommentAction(c *gin.Context) {
 	// token := c.Query("token")
-	// sddddd
+	var req CommentActionRequest
+	var rsp CommentActionResponse
+	err := c.ShouldBindQuery(&req)
+	if err != nil {
+		rsp.Response = service.Response{
+			StatusCode: -1,
+			StatusMsg:  err.Error(),
+		}
+		c.JSON(http.StatusBadRequest, rsp)
+		return
+	}
 
-	c.JSON(http.StatusOK, service.Response{StatusCode: 0})
+	// 检查ActionType
+	if req.ActionType != 1 && req.ActionType != 2 {
+		rsp.Response = service.Response{
+			StatusCode: -1,
+			StatusMsg:  "Bad ActionType",
+		}
+		c.JSON(http.StatusBadRequest, rsp)
+		return
+	}
+
+	//发布评论
+	if req.ActionType == 1 {
+		r, err := ctl.service.PublishComment(req.UserID, req.VideoID, req.CommentText)
+		if err != nil {
+			rsp.Response = service.Response{
+				StatusCode: -1,
+				StatusMsg:  err.Error(),
+			}
+			c.JSON(http.StatusBadRequest, rsp)
+			return
+		}
+		rsp.Response = r.Response
+		rsp.Comment = r.Comment
+		c.JSON(http.StatusOK, rsp)
+	}
+	//删除评论
+	if req.ActionType == 2 {
+		r, err := ctl.service.DeleteComment(req.CommentID)
+		if err != nil {
+			rsp.Response = service.Response{
+				StatusCode: -1,
+				StatusMsg:  err.Error(),
+			}
+			c.JSON(http.StatusBadRequest, rsp)
+			return
+		}
+		rsp.Response = r.Response
+		rsp.Comment = r.Comment
+		c.JSON(http.StatusOK, rsp)
+	}
+}
+
+type CommentListRequest struct {
+	Token   string `form:"token" binding:"required"`
+	VideoID uint64 `form:"video_id" binding:"required"`
+}
+type CommentListResponse struct {
+	service.Response
+	CommentList []service.Comment `json:"comment_list"`
 }
 
 func (ctl *Controller) CommentList(c *gin.Context) {
-	c.JSON(http.StatusOK, service.CommentListResponse{
-		Response: service.Response{StatusCode: 0},
-	})
+	var req CommentListRequest
+	var rsp CommentListResponse
+	err := c.ShouldBindQuery(&req)
+	if err != nil {
+		rsp.Response = service.Response{
+			StatusCode: -1,
+			StatusMsg:  err.Error(),
+		}
+		c.JSON(http.StatusBadRequest, rsp)
+	}
+	r, err := ctl.service.GetCommentList(req.VideoID)
+	if err != nil {
+		rsp.Response = service.Response{
+			StatusCode: -1,
+			StatusMsg:  err.Error(),
+		}
+		c.JSON(http.StatusInternalServerError, rsp)
+		return
+	}
+	rsp.Response = r.Response
+	rsp.CommentList = r.CommentList
+	c.JSON(http.StatusOK, rsp)
 }

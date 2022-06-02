@@ -1,6 +1,8 @@
 package model
 
 import (
+	"errors"
+
 	"github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
 )
@@ -78,7 +80,7 @@ func (u *UserModel) GetFollowerList(userId uint64) ([]*User, error) {
 // 关注一个用户
 func (u *UserModel) CreateFollow(userId uint64, followId uint64) error {
 	// 使用事务保证一致性
-	u.db.Transaction(func(tx *gorm.DB) error {
+	err := u.db.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Exec("insert into user_follows (user_id, follower_id) values (?, ?)", userId, followId).Error; err != nil {
 			return err
 		}
@@ -90,6 +92,9 @@ func (u *UserModel) CreateFollow(userId uint64, followId uint64) error {
 		}
 		return nil
 	})
+	if err != nil {
+		return err
+	}
 	// Todo: Redis缓存
 	return nil
 }
@@ -97,9 +102,9 @@ func (u *UserModel) CreateFollow(userId uint64, followId uint64) error {
 // 取消关注一个用户
 func (u *UserModel) DeleteFollow(userId uint64, followId uint64) error {
 	// 使用事务保证一致性
-	u.db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Exec("delete from user_follows where user_id = ? and follower_id = ?", userId, followId).Error; err != nil {
-			return err
+	err := u.db.Transaction(func(tx *gorm.DB) error {
+		if rows := tx.Exec("delete from user_follows where user_id = ? and follower_id = ?", userId, followId).RowsAffected; rows == 0 {
+			return errors.New("关系不存在")
 		}
 		if err := tx.Model(User{}).Where("id = ?", followId).Update("follow_count", gorm.Expr("follow_count - 1")).Error; err != nil {
 			return err
@@ -109,6 +114,9 @@ func (u *UserModel) DeleteFollow(userId uint64, followId uint64) error {
 		}
 		return nil
 	})
+	if err != nil {
+		return err
+	}
 	// Todo: Redis缓存
 	return nil
 }
