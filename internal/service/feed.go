@@ -8,7 +8,7 @@ import (
 	"github.com/yunyandz/tiktok-demo-backend/internal/model"
 )
 
-func (s *Service) GetFeed(ctx context.Context, userId uint64, isnew bool, lasttime time.Time) (*VideoListResponse, error) {
+func (s *Service) GetFeed(ctx context.Context, isnew bool, lasttime time.Time) (*VideoListResponse, error) {
 	vm := model.NewVideoModel(s.db, s.rds)
 	var videosModel []*model.Video
 	var err error

@@ -11,13 +11,12 @@ import (
 )
 
 func (ctl *Controller) Publish(c *gin.Context) {
-	token := c.PostForm("token")
-	uc, err := jwtx.ParseUserClaims(token)
-	if err != nil {
-		ctl.logger.Sugar().Errorf("ParseUserClaims error: %v", err)
+	uc, e := c.Get("claims")
+	if !e {
+		ctl.logger.Sugar().Errorf("Get claims error: %v", e)
 		c.JSON(http.StatusUnauthorized, service.Response{
 			StatusCode: -1,
-			StatusMsg:  err.Error(),
+			StatusMsg:  errorx.ErrInvalidToken.Error(),
 		})
 		return
 	}
@@ -41,7 +40,7 @@ func (ctl *Controller) Publish(c *gin.Context) {
 	}
 	title := c.PostForm("title")
 	// TODO: 判断文件类型是否为视频文件
-	res := ctl.service.PublishVideo(context.Background(), uc.UserID, data.Filename, file, title)
+	res := ctl.service.PublishVideo(context.Background(), uc.(*jwtx.UserClaims).UserID, data.Filename, file, title)
 	c.JSON(http.StatusOK, service.Response{
 		StatusCode: res.StatusCode,
 		StatusMsg:  res.StatusMsg,
@@ -50,17 +49,16 @@ func (ctl *Controller) Publish(c *gin.Context) {
 
 func (ctl *Controller) PublishList(c *gin.Context) {
 	var rsp service.VideoListResponse
-	token := c.PostForm("token")
-	uc, err := jwtx.ParseUserClaims(token)
-	if err != nil {
-		ctl.logger.Sugar().Errorf("ParseUserClaims error: %v", err)
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"status": -1,
-			"msg":    err.Error(),
+	uc, e := c.Get("claims")
+	if !e {
+		ctl.logger.Sugar().Errorf("Get claims error: %v", e)
+		c.JSON(http.StatusUnauthorized, service.Response{
+			StatusCode: -1,
+			StatusMsg:  errorx.ErrInvalidToken.Error(),
 		})
 		return
 	}
-	r, err := ctl.service.GetVideoList(context.Background(), uc.UserID)
+	r, err := ctl.service.GetVideoList(context.Background(), uc.(*jwtx.UserClaims).UserID)
 	if err != nil {
 		rsp.Response = service.Response{
 			StatusCode: -1,

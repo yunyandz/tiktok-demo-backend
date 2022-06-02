@@ -21,7 +21,7 @@ func Run(config *config.Config, controller *controller.Controller, logger *zap.L
 
 	r.Use(ginzap.Ginzap(logger, time.RFC3339, true))
 
-	router.InitRouter(r, controller)
+	router.InitRouter(logger, r, controller)
 
 	host := strings.Join([]string{config.Http.Host, config.Http.Port}, ":")
 	r.Run(host) // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")

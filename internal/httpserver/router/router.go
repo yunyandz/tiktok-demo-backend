@@ -4,9 +4,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/yunyandz/tiktok-demo-backend/internal/controller"
 	"github.com/yunyandz/tiktok-demo-backend/internal/httpserver/middleware"
+	"go.uber.org/zap"
 )
 
-func InitRouter(r *gin.Engine, ctl *controller.Controller) {
+func InitRouter(logger *zap.Logger, r *gin.Engine, ctl *controller.Controller) {
 	// public directory is used to serve static resources
 	r.Static("/static", "./public")
 
@@ -16,13 +17,13 @@ func InitRouter(r *gin.Engine, ctl *controller.Controller) {
 	apiRouter.GET("/feed/", ctl.Feed)
 
 	// using jwt auth
-	apiRouter.GET("/user", middleware.JWTAuth(), ctl.UserInfo)
+	apiRouter.GET("/user", middleware.JWTAuth(logger), ctl.UserInfo)
 
 	apiRouter.POST("/user/register", ctl.Register)
 	apiRouter.POST("/user/login", ctl.Login)
 
-	apiRouter.POST("/publish/action/", ctl.Publish)
-	apiRouter.GET("/publish/list/", ctl.PublishList)
+	apiRouter.POST("/publish/action/", middleware.JWTAuth(logger), ctl.Publish)
+	apiRouter.GET("/publish/list/", middleware.JWTAuth(logger), ctl.PublishList)
 
 	// extra apis - I
 	apiRouter.POST("/favorite/action/", ctl.FavoriteAction)
@@ -31,7 +32,7 @@ func InitRouter(r *gin.Engine, ctl *controller.Controller) {
 	apiRouter.GET("/comment/list/", ctl.CommentList)
 
 	// extra apis - II
-	apiRouter.POST("/relation/action/", middleware.JWTAuth(), ctl.RelationAction)
-	apiRouter.GET("/relation/follow/list/", middleware.JWTAuth(), ctl.FollowList)
+	apiRouter.POST("/relation/action/", middleware.JWTAuth(logger), ctl.RelationAction)
+	apiRouter.GET("/relation/follow/list/", middleware.JWTAuth(logger), ctl.FollowList)
 	apiRouter.GET("/relation/follower/list/", ctl.FollowerList)
 }
