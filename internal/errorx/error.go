@@ -11,6 +11,7 @@ var (
 	ErrUserDoesNotExists = errors.New("用户不存在")
 	ErrUserPassword      = errors.New("密码错误")
 
+	ErrUserOffline          = errors.New("请先登录")
 	ErrCommentDoesNotExists = errors.New("评论不存在")
 	ErrReadVideo            = errors.New("读取视频失败")
 	ErrNotVideo             = errors.New("不是视频文件")
