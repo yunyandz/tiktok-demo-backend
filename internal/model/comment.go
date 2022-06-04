@@ -19,6 +19,14 @@ func (v *VideoModel) GetVideoComments(id uint64) ([]*Comment, error) {
 	return comments, nil
 }
 
+func (v *VideoModel) GetVideoCommentsCount(id uint64) (int64, error) {
+	var count int64
+	if err := v.db.Model(Comment{}).Where("video_id = ?", id).Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
 // 使用Create创建一条评论
 func (v *VideoModel) CreateAComment(videoId uint64, userId uint64, content string) (*Comment, error) {
 	comment := Comment{UserID: userId, VideoID: videoId, Content: content}

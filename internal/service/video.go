@@ -14,7 +14,7 @@ type Video struct {
 	PlayUrl       string `json:"play_url,omitempty"`
 	CoverUrl      string `json:"cover_url,omitempty"`
 	FavoriteCount uint64 `json:"favorite_count,omitempty"`
-	CommentCount  uint32 `json:"comment_count,omitempty"`
+	CommentCount  uint64 `json:"comment_count,omitempty"`
 	IsFavorite    bool   `json:"is_favorite,omitempty"`
 	Title         string `json:"title,omitempty"`
 }
@@ -87,7 +87,7 @@ func (s *Service) GetVideoList(ctx context.Context, UserID uint64) (*VideoListRe
 		video.PlayUrl = arr.Playurl
 		video.CoverUrl = arr.Coverurl
 		video.FavoriteCount = arr.Likecount
-		video.CommentCount = uint32(arr.Commentcount)
+		video.CommentCount = arr.Commentcount
 		video.Title = arr.Title
 		videos = append(videos, video)
 	}
@@ -103,6 +103,7 @@ func (s *Service) GetVideoList(ctx context.Context, UserID uint64) (*VideoListRe
 
 func (s *Service) GetLikeList(userId uint64) VideoListResponse {
 	vido := model.NewVideoModel(s.db, s.rds)
+	um := model.NewUserModel(s.db, s.rds)
 	videos, err := vido.GetUserLikeVideos(userId)
 	// TODO is_follow comment_count 字段未实现
 	userModel := model.NewUserModel(s.db, s.rds)
@@ -113,9 +114,10 @@ func (s *Service) GetLikeList(userId uint64) VideoListResponse {
 		vid.PlayUrl = v.Playurl
 		vid.CoverUrl = v.Coverurl
 		vid.Title = v.Title
-		vid.IsFavorite = vido.IsFavorite(userId, uint64(v.ID))
-		likeCount, err := vido.GetVideoLikesCount(uint64(v.ID))
+		vid.IsFavorite = true
+		likeCount := v.Likecount
 		vid.FavoriteCount = uint64(likeCount)
+		vid.CommentCount = v.Commentcount
 		user, err := userModel.GetUser(v.AuthorID)
 		if err != nil {
 			res[i] = Video{}
@@ -125,6 +127,7 @@ func (s *Service) GetLikeList(userId uint64) VideoListResponse {
 		vid.Author.Username = user.Username
 		vid.Author.FollowCount = user.FollowCount
 		vid.Author.FollowerCount = user.FollowerCount
+		vid.Author.IsFollow = um.IsFollow(userId, uint64(user.ID))
 		res[i] = vid
 	}
 	if err != nil {
