@@ -44,7 +44,7 @@ func (s *Service) GetFeed(ctx context.Context, isnew bool, lasttime time.Time) (
 
 		video.PlayUrl = arr.Playurl
 		video.CoverUrl = arr.Coverurl
-		video.FavoriteCount = uint32(arr.Likecount)
+		video.FavoriteCount = arr.Likecount
 		video.CommentCount = uint32(arr.Commentcount)
 		video.Title = arr.Title
 
