@@ -28,7 +28,7 @@ func InitRouter(logger *zap.Logger, r *gin.Engine, ctl *controller.Controller) {
 	// extra apis - I
 	apiRouter.POST("/favorite/action/", middleware.JWTAuth(logger), ctl.FavoriteAction)
 	apiRouter.GET("/favorite/list/", middleware.JWTAuth(logger), ctl.FavoriteList)
-	apiRouter.POST("/comment/action/", ctl.CommentAction)
+	apiRouter.POST("/comment/action/", middleware.JWTAuth(logger), ctl.CommentAction)
 	apiRouter.GET("/comment/list/", ctl.CommentList)
 
 	// extra apis - II
