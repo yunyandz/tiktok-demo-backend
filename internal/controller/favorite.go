@@ -14,6 +14,11 @@ type FavoriteActionRequest struct {
 	like       bool
 }
 
+const (
+	FavoriteActionTypeLike    = "1"
+	FavoriteActionTypeDislike = "2"
+)
+
 // FavoriteAction 用户点赞操作
 func (ctl *Controller) FavoriteAction(c *gin.Context) {
 	// token := c.Query("token")
@@ -26,10 +31,16 @@ func (ctl *Controller) FavoriteAction(c *gin.Context) {
 		c.JSON(http.StatusOK, rsp)
 		return
 	}
-	if req.ActionType == "1" {
+	switch req.ActionType {
+	case FavoriteActionTypeLike:
 		req.like = true
-	} else {
+	case FavoriteActionTypeDislike:
 		req.like = false
+	default:
+		rsp.StatusCode = -1
+		rsp.StatusMsg = "action_type error"
+		c.JSON(http.StatusOK, rsp)
+		return
 	}
 	*rsp = ctl.service.LikeDisliakeVideo(req.UserID, req.VideoId, req.like)
 	c.JSON(http.StatusOK, rsp)
