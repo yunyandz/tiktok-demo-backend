@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"github.com/yunyandz/tiktok-demo-backend/internal/constant"
+	"github.com/yunyandz/tiktok-demo-backend/internal/errorx"
 	"gorm.io/gorm"
 )
 
@@ -19,10 +20,10 @@ type Video struct {
 	Coverurl    string `gorm:"size:1024"`
 
 	Commentcount uint64
-	Likecount    uint64
+	Likecount    uint64 `gorm:"default:0"`
 
-	Likes    []User    `gorm:"many2many:user_likes"`
-	Comments []Comment `gorm:"many2many:video_comments"`
+	Likes    []*User    `gorm:"many2many:user_likes"`
+	Comments []*Comment `gorm:"many2many:video_comments"`
 }
 
 type VideoModel struct {
@@ -108,7 +109,7 @@ func (v *VideoModel) GetVideosByUser(userId uint64) ([]*Video, error) {
 // 获取用户的视频点赞列表
 func (v *VideoModel) GetUserLikeVideos(userId uint64) ([]*Video, error) {
 	var videos []*Video
-	if err := v.db.Where("id in (select video_id from likes where user_id = ?)", userId).Find(&videos).Error; err != nil {
+	if err := v.db.Raw("SELECT * FROM videos WHERE id IN (SELECT video_id FROM user_likes WHERE user_id = ?)", userId).Scan(&videos).Error; err != nil {
 		return nil, err
 	}
 	return videos, nil
@@ -116,7 +117,16 @@ func (v *VideoModel) GetUserLikeVideos(userId uint64) ([]*Video, error) {
 
 // 点赞视频
 func (v *VideoModel) LikeVideo(userId uint64, videoId uint64) error {
-	if err := v.db.Exec("insert into likes (user_id, video_id) values (?, ?)", userId, videoId).Error; err != nil {
+	err := v.db.Transaction(func(tx *gorm.DB) error {
+		if row := v.db.Exec("INSERT INTO user_likes (user_id, video_id) VALUES (?, ?)", userId, videoId).RowsAffected; row != 1 {
+			return errorx.ErrUserAlreadyLikeVideo
+		}
+		if err := v.db.Exec("UPDATE videos SET likecount = likecount + 1 WHERE id = ?", videoId).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
 		return err
 	}
 	return nil
@@ -124,17 +134,35 @@ func (v *VideoModel) LikeVideo(userId uint64, videoId uint64) error {
 
 // 取消点赞视频
 func (v *VideoModel) UnLikeVideo(userId uint64, videoId uint64) error {
-	if err := v.db.Exec("delete from likes where user_id = ? and video_id = ?", userId, videoId).Error; err != nil {
+	err := v.db.Transaction(func(tx *gorm.DB) error {
+		if v.db.Exec("DELETE FROM user_likes WHERE user_id = ? AND video_id = ?", userId, videoId).RowsAffected == 0 {
+			return errorx.ErrUserNotLikeVideo
+		}
+		if err := v.db.Exec("UPDATE videos SET likecount = likecount - 1 WHERE id = ?", videoId).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
 		return err
 	}
 	return nil
 }
 
 // 获取视频的点赞数
-func (v *VideoModel) GetVideoLikesCount(id uint64) (int, error) {
+func (v *VideoModel) GetVideoLikesCount(id uint64) (int64, error) {
 	var count int64
 	if err := v.db.Model(&Video{}).Where("id = ?", id).Count(&count).Error; err != nil {
 		return 0, err
 	}
-	return int(count), nil
+	return count, nil
+}
+
+//查询视频点赞
+func (v *VideoModel) IsFavorite(userId uint64, videoId uint64) (bool, error) {
+	var count int64
+	if err := v.db.Raw("SELECT COUNT(*) FROM user_likes WHERE user_id = ? AND video_id = ?", userId, videoId).Scan(&count).Error; err != nil {
+		return false, err
+	}
+	return count > 0, nil
 }

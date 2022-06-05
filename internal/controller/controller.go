@@ -3,6 +3,8 @@ package controller
 import (
 	"sync"
 
+	"github.com/gin-gonic/gin"
+	"github.com/yunyandz/tiktok-demo-backend/internal/jwtx"
 	"github.com/yunyandz/tiktok-demo-backend/internal/service"
 	"go.uber.org/zap"
 )
@@ -25,4 +27,13 @@ func New(service *service.Service, logger *zap.Logger) *Controller {
 		}
 	})
 	return controller
+}
+
+func (ctl *Controller) getUserClaims(c *gin.Context) (*jwtx.UserClaims, bool) {
+	uc, e := c.Get("claims")
+	if !e {
+		ctl.logger.Sugar().Errorf("Get claims error: %v", e)
+		return nil, false
+	}
+	return uc.(*jwtx.UserClaims), true
 }

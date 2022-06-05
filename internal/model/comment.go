@@ -19,10 +19,28 @@ func (v *VideoModel) GetVideoComments(id uint64) ([]*Comment, error) {
 	return comments, nil
 }
 
+func (v *VideoModel) GetVideoCommentsCount(id uint64) (int64, error) {
+	var count int64
+	if err := v.db.Model(Comment{}).Where("video_id = ?", id).Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
 // 使用Create创建一条评论
 func (v *VideoModel) CreateAComment(videoId uint64, userId uint64, content string) (*Comment, error) {
 	comment := Comment{UserID: userId, VideoID: videoId, Content: content}
-	err := v.db.Create(&comment).Error
+	err := v.db.Transaction(func(tx *gorm.DB) error {
+		err := tx.Create(&comment).Error
+		if err != nil {
+			return err
+		}
+		if err := tx.Model(&Video{}).Where("id = ?", videoId).
+			Update("commentcount", gorm.Expr("commentcount + ?", 1)).Error; err != nil {
+			return err
+		}
+		return nil
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +59,17 @@ func (v *VideoModel) FindAComment(commentId uint64) (*Comment, error) {
 
 // 删除一个评论
 func (v *VideoModel) DeleteAComment(commentId uint64) error {
-	if err := v.db.Delete(&Comment{}, commentId).Error; err != nil {
+	err := v.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Delete(&Comment{}, commentId).Error; err != nil {
+			return err
+		}
+		if err := tx.Model(&Video{}).Where("id = ?", commentId).
+			Update("commentcount", gorm.Expr("commentcount - ?", 1)).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
 		return err
 	}
 	return nil

@@ -4,11 +4,12 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/yunyandz/tiktok-demo-backend/internal/errorx"
+	"github.com/yunyandz/tiktok-demo-backend/internal/jwtx"
 	"github.com/yunyandz/tiktok-demo-backend/internal/service"
 )
 
 type CommentActionRequest struct {
-	UserID      uint64 `form:"user_id" binding:"required"`
 	Token       string `form:"token" binding:"required"`
 	VideoID     uint64 `form:"video_id" binding:"required"`
 	ActionType  uint64 `form:"action_type" binding:"required"` //
@@ -35,17 +36,29 @@ func (ctl *Controller) CommentAction(c *gin.Context) {
 			StatusCode: -1,
 			StatusMsg:  err.Error(),
 		}
+		ctl.logger.Sugar().Errorf("bind query failed: %s", err.Error())
 		c.JSON(http.StatusBadRequest, rsp)
 		return
 	}
+	uc, e := c.Get("claims")
+	if !e {
+		ctl.logger.Sugar().Errorf("Get claims error: %v", e)
+		c.JSON(http.StatusUnauthorized, service.Response{
+			StatusCode: -1,
+			StatusMsg:  errorx.ErrInvalidToken.Error(),
+		})
+		return
+	}
+	claims := uc.(*jwtx.UserClaims)
 	switch req.ActionType {
 	case CommentActionTypePublish:
-		r, err := ctl.service.PublishComment(req.UserID, req.VideoID, req.CommentText)
+		r, err := ctl.service.PublishComment(claims.UserID, req.VideoID, req.CommentText)
 		if err != nil {
 			rsp.Response = service.Response{
 				StatusCode: -1,
 				StatusMsg:  err.Error(),
 			}
+			ctl.logger.Sugar().Errorf("publish comment failed: %s", err.Error())
 			c.JSON(http.StatusBadRequest, rsp)
 			return
 		}
@@ -59,6 +72,7 @@ func (ctl *Controller) CommentAction(c *gin.Context) {
 				StatusCode: -1,
 				StatusMsg:  err.Error(),
 			}
+			ctl.logger.Sugar().Errorf("delete comment failed: %s", err.Error())
 			c.JSON(http.StatusBadRequest, rsp)
 			return
 		}
@@ -70,6 +84,7 @@ func (ctl *Controller) CommentAction(c *gin.Context) {
 			StatusCode: -1,
 			StatusMsg:  "Bad ActionType",
 		}
+		ctl.logger.Sugar().Errorf("Bad ActionType: %d", req.ActionType)
 		c.JSON(http.StatusBadRequest, rsp)
 		return
 	}

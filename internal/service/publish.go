@@ -2,8 +2,11 @@ package service
 
 import (
 	"context"
+	"crypto/md5"
+	"encoding/hex"
 	"encoding/json"
 	"io"
+	"net/url"
 	"os"
 	"strings"
 
@@ -20,23 +23,28 @@ import (
 func (s *Service) PublishVideo(ctx context.Context, UserID uint64, filename string, videodata io.Reader, title string) Response {
 	playurl := ""
 	coverurl := ""
+	filename = strings.Join([]string{s.Hash([]byte(filename + title)), filename}, "-")
 	coverfilename := s.GetCoverFileName(filename)
 	if s.cfg.S3.Vaild {
 		var err error
-		playurl, err = s.PreSignUrl(&filename)
+		pus, err := s.PreSignUrl(&filename)
 		if err != nil {
 			return Response{
 				StatusCode: 1,
 				StatusMsg:  err.Error(),
 			}
 		}
-		coverurl, err = s.PreSignUrl(&coverfilename)
+		cus, err := s.PreSignUrl(&coverfilename)
 		if err != nil {
 			return Response{
 				StatusCode: 1,
 				StatusMsg:  err.Error(),
 			}
 		}
+		purl, _ := url.Parse(pus)
+		curl, _ := url.Parse(cus)
+		playurl = util.GetRawUrl(purl)
+		coverurl = util.GetRawUrl(curl)
 	}
 	video := model.Video{
 		AuthorID: UserID,
@@ -103,6 +111,7 @@ func (s *Service) PreSignUrl(filename *string) (string, error) {
 	}
 	//转换为https
 	playurl := strings.Replace(pr.URL, "http://", "https://", 1)
+	playurl = strings.TrimRight(playurl, "/")
 	s.logger.Sugar().Debugf("presign url to s3 success: %s", playurl)
 	return playurl, nil
 }
@@ -155,4 +164,10 @@ func (s *Service) GetCoverFromVideoFile(data io.Reader) (io.Reader, error) {
 
 func (s *Service) GetCoverFileName(filename string) string {
 	return strings.TrimSuffix(filename, ".mp4") + ".jpg"
+}
+
+func (s *Service) Hash(data []byte) string {
+	h := md5.New()
+	h.Write(data)
+	return hex.EncodeToString(h.Sum(nil))
 }

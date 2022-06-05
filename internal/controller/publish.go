@@ -11,12 +11,12 @@ import (
 )
 
 func (ctl *Controller) Publish(c *gin.Context) {
-	uc, e := c.Get("claims")
-	if !e {
-		ctl.logger.Sugar().Errorf("Get claims error: %v", e)
-		c.JSON(http.StatusUnauthorized, service.Response{
+	uc, _ := ctl.getUserClaims(c)
+	var err error
+	if err != nil {
+		c.JSON(http.StatusBadRequest, service.Response{
 			StatusCode: -1,
-			StatusMsg:  errorx.ErrInvalidToken.Error(),
+			StatusMsg:  errorx.ErrReadVideo.Error(),
 		})
 		return
 	}
@@ -40,7 +40,7 @@ func (ctl *Controller) Publish(c *gin.Context) {
 	}
 	title := c.PostForm("title")
 	// TODO: 判断文件类型是否为视频文件
-	res := ctl.service.PublishVideo(context.Background(), uc.(*jwtx.UserClaims).UserID, data.Filename, file, title)
+	res := ctl.service.PublishVideo(context.Background(), uc.UserID, data.Filename, file, title)
 	c.JSON(http.StatusOK, service.Response{
 		StatusCode: res.StatusCode,
 		StatusMsg:  res.StatusMsg,
@@ -58,15 +58,7 @@ func (ctl *Controller) PublishList(c *gin.Context) {
 		})
 		return
 	}
-	r, err := ctl.service.GetVideoList(context.Background(), uc.(*jwtx.UserClaims).UserID)
-	if err != nil {
-		rsp.Response = service.Response{
-			StatusCode: -1,
-			StatusMsg:  err.Error(),
-		}
-		c.JSON(http.StatusInternalServerError, rsp)
-		return
-	}
+	r := ctl.service.GetVideoList(context.Background(), uc.(*jwtx.UserClaims).UserID)
 	rsp.Response = r.Response
 	rsp.VideoList = r.VideoList
 	c.JSON(http.StatusOK, rsp)

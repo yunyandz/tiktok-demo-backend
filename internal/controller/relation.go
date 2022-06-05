@@ -8,7 +8,6 @@ import (
 )
 
 type RealationRequest struct {
-	UserId     uint64 `form:"user_id" binding:"required"`
 	Token      string `form:"token" binding:"required"`
 	ToUserId   uint64 `form:"to_user_id" binding:"required"`
 	ActionType int8   `form:"action_type" binding:"required"`
@@ -23,20 +22,21 @@ func (ctl *Controller) RelationAction(c *gin.Context) {
 	// token := c.Query("token")
 	var req RealationRequest
 	err := c.ShouldBind(&req)
+	uc, _ := ctl.getUserClaims(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, service.Response{StatusCode: 1, StatusMsg: err.Error()})
 		return
 	}
-	if req.ToUserId == req.UserId {
+	if req.ToUserId == uc.UserID {
 		c.JSON(http.StatusOK, service.Response{StatusCode: 1, StatusMsg: "不能对自己进行操作"})
 		return
 	}
 	switch req.ActionType {
 	case Follow:
-		rsp := ctl.service.Follow(req.ToUserId, req.UserId)
+		rsp := ctl.service.Follow(uc.UserID, req.ToUserId)
 		c.JSON(http.StatusOK, rsp)
 	case UnFollow:
-		rsp := ctl.service.UnFollow(req.ToUserId, req.UserId)
+		rsp := ctl.service.UnFollow(uc.UserID, req.ToUserId)
 		c.JSON(http.StatusOK, rsp)
 	default:
 		c.JSON(http.StatusOK, service.Response{StatusCode: 1, StatusMsg: "invaild action"})
