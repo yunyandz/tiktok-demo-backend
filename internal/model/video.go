@@ -109,11 +109,7 @@ func (v *VideoModel) GetVideosByUser(userId uint64) ([]*Video, error) {
 // 获取用户的视频点赞列表
 func (v *VideoModel) GetUserLikeVideos(userId uint64) ([]*Video, error) {
 	var videos []*Video
-	var user User
-	if err := v.db.Model(&User{}).Where("id = ?", userId).First(&user).Error; err != nil {
-		return nil, err
-	}
-	if err := v.db.Model(&user).Association("Likes").Find(&videos); err != nil {
+	if err := v.db.Raw("SELECT * FROM videos WHERE id IN (SELECT video_id FROM user_likes WHERE user_id = ?)", userId).Scan(&videos).Error; err != nil {
 		return nil, err
 	}
 	return videos, nil

@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"crypto/md5"
+	"encoding/hex"
 	"encoding/json"
 	"io"
 	"net/url"
@@ -21,6 +23,7 @@ import (
 func (s *Service) PublishVideo(ctx context.Context, UserID uint64, filename string, videodata io.Reader, title string) Response {
 	playurl := ""
 	coverurl := ""
+	filename = strings.Join([]string{s.Hash([]byte(filename + title)), filename}, "-")
 	coverfilename := s.GetCoverFileName(filename)
 	if s.cfg.S3.Vaild {
 		var err error
@@ -161,4 +164,10 @@ func (s *Service) GetCoverFromVideoFile(data io.Reader) (io.Reader, error) {
 
 func (s *Service) GetCoverFileName(filename string) string {
 	return strings.TrimSuffix(filename, ".mp4") + ".jpg"
+}
+
+func (s *Service) Hash(data []byte) string {
+	h := md5.New()
+	h.Write(data)
+	return hex.EncodeToString(h.Sum(nil))
 }
