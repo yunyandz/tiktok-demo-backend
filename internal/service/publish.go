@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"net/url"
 	"os"
 	"strings"
 
@@ -23,20 +24,24 @@ func (s *Service) PublishVideo(ctx context.Context, UserID uint64, filename stri
 	coverfilename := s.GetCoverFileName(filename)
 	if s.cfg.S3.Vaild {
 		var err error
-		playurl, err = s.PreSignUrl(&filename)
+		pus, err := s.PreSignUrl(&filename)
 		if err != nil {
 			return Response{
 				StatusCode: 1,
 				StatusMsg:  err.Error(),
 			}
 		}
-		coverurl, err = s.PreSignUrl(&coverfilename)
+		cus, err := s.PreSignUrl(&coverfilename)
 		if err != nil {
 			return Response{
 				StatusCode: 1,
 				StatusMsg:  err.Error(),
 			}
 		}
+		purl, _ := url.Parse(pus)
+		curl, _ := url.Parse(cus)
+		playurl = util.GetRawUrl(purl)
+		coverurl = util.GetRawUrl(curl)
 	}
 	video := model.Video{
 		AuthorID: UserID,
@@ -103,6 +108,7 @@ func (s *Service) PreSignUrl(filename *string) (string, error) {
 	}
 	//转换为https
 	playurl := strings.Replace(pr.URL, "http://", "https://", 1)
+	playurl = strings.TrimRight(playurl, "/")
 	s.logger.Sugar().Debugf("presign url to s3 success: %s", playurl)
 	return playurl, nil
 }

@@ -15,4 +15,6 @@ var (
 	ErrCommentDoesNotExists = errors.New("评论不存在")
 	ErrReadVideo            = errors.New("读取视频失败")
 	ErrNotVideo             = errors.New("不是视频文件")
+	ErrUserAlreadyLikeVideo = errors.New("用户已经点赞过该视频")
+	ErrUserNotLikeVideo     = errors.New("用户没有点赞过该视频")
 )

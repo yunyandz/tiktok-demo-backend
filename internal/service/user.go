@@ -147,17 +147,7 @@ func (s *Service) GetFollowList(userId uint64) UserListResponse {
 			},
 		}
 	}
-	var users []User
-	var user *User
-	for _, item := range followList {
-		user = &User{}
-		user.ID = uint64(item.ID)
-		user.Username = item.Username
-		user.FollowCount = item.FollowCount
-		user.FollowerCount = item.FollowerCount
-		user.IsFollow = true
-		users = append(users, *user)
-	}
+	users := s.convertManyUserModelToUser(userId, followList)
 	return UserListResponse{
 		Response: Response{
 			StatusCode: 0,
@@ -177,17 +167,7 @@ func (s *Service) GetFollowerList(userId uint64) UserListResponse {
 			},
 		}
 	}
-	var users []User
-	var user *User
-	for _, item := range followList {
-		user = &User{}
-		user.ID = uint64(item.ID)
-		user.Username = item.Username
-		user.FollowCount = item.FollowCount
-		user.FollowerCount = item.FollowerCount
-		user.IsFollow = userModel.IsFollow(uint64(item.ID), userId)
-		users = append(users, *user)
-	}
+	users := s.convertManyUserModelToUser(userId, followList)
 	return UserListResponse{
 		Response: Response{
 			StatusCode: 0,
@@ -203,22 +183,60 @@ func (s *Service) GetUserInfo(UserID uint64) (*UserResponse, error) {
 		return nil, errorx.ErrUserDoesNotExists
 	}
 
-	// TODO 需要查follow表
-	// favoriteModel.IsFollow()
+	u, err := s.convertUserModelToUser(UserID, user)
+	if err != nil {
+		return nil, err
+	}
 
 	rsp := UserResponse{
 		Response: Response{
 			StatusCode: 0,
 			StatusMsg:  "ok",
 		},
-		User: User{
-			ID:            uint64(user.Model.ID),
-			Username:      user.Username,
-			FollowCount:   user.FollowCount,
-			FollowerCount: user.FollowerCount,
-			// TODO 需要查follow表
-			IsFollow: false,
-		},
+		User: u,
 	}
 	return &rsp, nil
+}
+
+func (s *Service) convertManyUserModelToUser(selfid uint64, userList []*model.User) []User {
+	var users []User
+	for _, item := range userList {
+		user, err := s.convertUserModelToUser(selfid, item)
+		if err != nil {
+			continue
+		}
+		users = append(users, user)
+	}
+	return users
+}
+
+func (s *Service) convertUserModelToUser(selfid uint64, userModel *model.User) (User, error) {
+	isfollow, err := s.isFollow(selfid, uint64(userModel.Model.ID))
+	if err != nil {
+		s.logger.Sugar().Debugf("convertUserModelToUser isFollow err: %s", err.Error())
+		return User{}, err
+	}
+	s.logger.Sugar().Debugf("convertUserModelToUser isfollow: %d->%d:%v", selfid, userModel.ID, isfollow)
+	user := User{
+		ID:            uint64(userModel.Model.ID),
+		Username:      userModel.Username,
+		FollowCount:   userModel.FollowCount,
+		FollowerCount: userModel.FollowerCount,
+		IsFollow:      isfollow,
+	}
+	return user, nil
+}
+
+func (s *Service) isFollow(userId uint64, to_userId uint64) (bool, error) {
+	userModel := model.NewUserModel(s.db, s.rds)
+	return userModel.IsFollow(userId, to_userId)
+}
+
+func (s *Service) getUser(selfID uint64, userID uint64) (User, error) {
+	userModel := model.NewUserModel(s.db, s.rds)
+	user, err := userModel.GetUser(userID)
+	if err != nil {
+		return User{}, errorx.ErrUserDoesNotExists
+	}
+	return s.convertUserModelToUser(selfID, user)
 }

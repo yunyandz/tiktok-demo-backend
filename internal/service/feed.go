@@ -8,7 +8,13 @@ import (
 	"github.com/yunyandz/tiktok-demo-backend/internal/model"
 )
 
-func (s *Service) GetFeed(ctx context.Context, isnew bool, lasttime time.Time) (*VideoListResponse, error) {
+type FeedResponse struct {
+	Response
+	VideoList []Video `json:"video_list,omitempty"`
+	NextTime  int64   `json:"next_time,omitempty"`
+}
+
+func (s *Service) GetFeed(ctx context.Context, userId uint64, isnew bool, isTour bool, lasttime time.Time) (*FeedResponse, error) {
 	vm := model.NewVideoModel(s.db, s.rds)
 	var videosModel []*model.Video
 	var err error
@@ -21,43 +27,14 @@ func (s *Service) GetFeed(ctx context.Context, isnew bool, lasttime time.Time) (
 		s.logger.Sugar().Errorf("get video failed: %s", err.Error())
 		return nil, errorx.ErrUserOffline
 	}
-	userModel := model.NewUserModel(s.db, s.rds)
-	// TODO 封装需要的信息
-	var videos []Video
-	for _, arr := range videosModel {
-		var video Video
-		// 根据获取到的authorId去
-		user, err := userModel.GetUser(arr.AuthorID)
-		if err != nil {
-			return nil, errorx.ErrUserDoesNotExists
-		}
-		// 封装一个Video
-		video.Id = uint64(arr.ID)
-
-		video.Author.ID = uint64(user.ID)
-		video.Author.Username = user.Username
-		video.Author.FollowCount = user.FollowCount
-		video.Author.FollowerCount = user.FollowerCount
-		// 暂时先设置为false
-		// TODO 需要设置一个SQL查询是否关注
-		video.Author.IsFollow = false
-
-		video.PlayUrl = arr.Playurl
-		video.CoverUrl = arr.Coverurl
-		video.FavoriteCount = arr.Likecount
-		video.CommentCount = arr.Commentcount
-		video.Title = arr.Title
-
-		videos = append(videos, video)
-
-	}
-	rsp := VideoListResponse{
+	videos, nt := s.convertVideoModeltoVideoWithNextTime(userId, videosModel, isTour, lasttime)
+	rsp := FeedResponse{
 		Response: Response{
 			StatusCode: 0,
 			StatusMsg:  "ok",
 		},
 		VideoList: videos,
+		NextTime:  nt.UnixMilli(),
 	}
 	return &rsp, nil
-
 }

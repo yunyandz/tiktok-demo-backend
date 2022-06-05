@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/yunyandz/tiktok-demo-backend/internal/errorx"
 	"github.com/yunyandz/tiktok-demo-backend/internal/model"
 )
 
@@ -19,125 +18,133 @@ type Video struct {
 	Title         string `json:"title,omitempty"`
 }
 
-type FeedResponse struct {
-	Response
-	VideoList []Video `json:"video_list,omitempty"`
-	NextTime  int64   `json:"next_time,omitempty"`
-}
-
 type VideoListResponse struct {
 	Response
 	VideoList []Video `json:"video_list"`
 }
 
-func (s *Service) Feed(userId uint64, lasttime time.Time) FeedResponse {
-	return FeedResponse{
-		Response:  Response{StatusCode: 0},
-		VideoList: []Video{},
-		NextTime:  time.Now().Unix(),
-	}
-}
-
-func (s *Service) LikeDisliakeVideo(userId uint64, videoId uint64, like bool) Response {
+func (s *Service) LikeDisliakeVideo(userId uint64, videoId uint64, like bool) *Response {
 	rsp := Response{}
 	vid := model.NewVideoModel(s.db, s.rds)
-	if like == true {
+	if like {
 		err := vid.LikeVideo(userId, videoId)
 		if err != nil {
 			rsp.StatusCode = -1
 			rsp.StatusMsg = err.Error()
-			return rsp
+			return &rsp
 		}
+		return &Response{StatusCode: 0}
 	}
 	err := vid.UnLikeVideo(userId, videoId)
 	if err != nil {
 		rsp.StatusCode = -1
 		rsp.StatusMsg = err.Error()
-		return rsp
+		return &rsp
 	}
-	return Response{StatusCode: 0}
+	return &Response{StatusCode: 0}
 }
 
-func (s *Service) GetVideoList(ctx context.Context, UserID uint64) (*VideoListResponse, error) {
+func (s *Service) GetVideoList(ctx context.Context, userId uint64) *VideoListResponse {
 	vm := model.NewVideoModel(s.db, s.rds)
-	videosModel, err := vm.GetVideosByUser(UserID)
-	userModel := model.NewUserModel(s.db, s.rds)
+	videos, err := vm.GetVideosByUser(userId)
 	if err != nil {
 		s.logger.Sugar().Errorf("get video failed: %s", err.Error())
-		return nil, errorx.ErrUserOffline
+		return &VideoListResponse{
+			Response: Response{
+				StatusCode: -1,
+				StatusMsg:  err.Error(),
+			},
+		}
 	}
 	// 封装需要的信息
-	var videos []Video
-	for _, arr := range videosModel {
-		var video Video
-		// 根据获取到的authorId去
-		user, err := userModel.GetUser(arr.AuthorID)
-		if err != nil {
-			return nil, errorx.ErrUserDoesNotExists
-		}
-		// 封装一个Video
-		video.Id = uint64(arr.ID)
-		video.Author.ID = uint64(user.ID)
-		video.Author.Username = user.Username
-		video.Author.FollowCount = user.FollowCount
-		video.Author.FollowerCount = user.FollowerCount
-		// 暂时先设置为false
-		// TODO 需要设置一个SQL查询是否关注
-		video.Author.IsFollow = false
-		video.PlayUrl = arr.Playurl
-		video.CoverUrl = arr.Coverurl
-		video.FavoriteCount = arr.Likecount
-		video.CommentCount = arr.Commentcount
-		video.Title = arr.Title
-		videos = append(videos, video)
-	}
-	rsp := VideoListResponse{
+	res := s.convertVideoModeltoVideo(userId, videos, false)
+	return &VideoListResponse{
 		Response: Response{
 			StatusCode: 0,
 			StatusMsg:  "ok",
 		},
-		VideoList: videos,
+		VideoList: res,
 	}
-	return &rsp, nil
 }
 
-func (s *Service) GetLikeList(userId uint64) VideoListResponse {
+func (s *Service) GetLikeList(userId uint64) *VideoListResponse {
 	vido := model.NewVideoModel(s.db, s.rds)
-	um := model.NewUserModel(s.db, s.rds)
 	videos, err := vido.GetUserLikeVideos(userId)
-	// TODO is_follow comment_count 字段未实现
-	userModel := model.NewUserModel(s.db, s.rds)
-	var res = make([]Video, len(videos))
-	for i, v := range videos {
-		vid := Video{}
-		vid.Id = uint64(v.ID)
-		vid.PlayUrl = v.Playurl
-		vid.CoverUrl = v.Coverurl
-		vid.Title = v.Title
-		vid.IsFavorite = true
-		likeCount := v.Likecount
-		vid.FavoriteCount = uint64(likeCount)
-		vid.CommentCount = v.Commentcount
-		user, err := userModel.GetUser(v.AuthorID)
-		if err != nil {
-			res[i] = Video{}
-			continue
-		}
-		vid.Author.ID = uint64(user.ID)
-		vid.Author.Username = user.Username
-		vid.Author.FollowCount = user.FollowCount
-		vid.Author.FollowerCount = user.FollowerCount
-		vid.Author.IsFollow = um.IsFollow(userId, uint64(user.ID))
-		res[i] = vid
-	}
 	if err != nil {
-		return VideoListResponse{
+		s.logger.Sugar().Errorf("get video failed: %s", err.Error())
+		return &VideoListResponse{
+			Response: Response{
+				StatusCode: -1,
+				StatusMsg:  "get video failed",
+			},
+			VideoList: []Video{},
+		}
+	}
+	s.logger.Sugar().Debugf("get video success: %v", videos)
+	res := s.convertVideoModeltoVideo(userId, videos, false)
+	if err != nil {
+		return &VideoListResponse{
 			Response:  Response{StatusCode: -1, StatusMsg: err.Error()},
 			VideoList: []Video{},
 		}
 	}
-	return VideoListResponse{
+	s.logger.Sugar().Debugf("get like list success")
+	return &VideoListResponse{
 		Response:  Response{StatusCode: 0},
 		VideoList: res,
 	}
+}
+
+func (s *Service) convertVideoModeltoVideo(selfid uint64, videos []*model.Video, isTour bool) []Video {
+	res, _ := s.convertVideoModeltoVideoWithNextTime(selfid, videos, isTour, time.Now())
+	return res
+}
+
+func (s *Service) convertVideoModeltoVideoWithNextTime(selfid uint64, videos []*model.Video, isTour bool, lasttime time.Time) ([]Video, time.Time) {
+	if lasttime.IsZero() {
+		lasttime = time.Now()
+	}
+	nextTime := lasttime
+	var res = make([]Video, len(videos))
+	for i, v := range videos {
+		vid := Video{}
+
+		user, err := s.getUser(selfid, v.AuthorID)
+		if err != nil {
+			s.logger.Sugar().Errorf("get user failed: %s", err.Error())
+			res[i] = Video{}
+			continue
+		}
+		vid.Author = user
+
+		vid.IsFavorite = false
+		if !isTour {
+			vid.IsFavorite, err = s.isFavorite(selfid, uint64(v.ID))
+			if err != nil {
+				s.logger.Sugar().Errorf("get video favorite failed: %s", err.Error())
+				res[i] = Video{}
+				continue
+			}
+			s.logger.Sugar().Debugf("get video favorite success: %v", vid.IsFavorite)
+		}
+
+		vid.Id = uint64(v.ID)
+		vid.PlayUrl = v.Playurl
+		vid.CoverUrl = v.Coverurl
+		vid.Title = v.Title
+		vid.FavoriteCount = v.Likecount
+		vid.CommentCount = v.Commentcount
+
+		res[i] = vid
+
+		if v.CreatedAt.Before(nextTime) {
+			nextTime = v.CreatedAt
+		}
+	}
+	return res, nextTime
+}
+
+func (s *Service) isFavorite(userId uint64, videoId uint64) (bool, error) {
+	vid := model.NewVideoModel(s.db, s.rds)
+	return vid.IsFavorite(userId, videoId)
 }

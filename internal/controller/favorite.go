@@ -8,10 +8,8 @@ import (
 )
 
 type FavoriteActionRequest struct {
-	UserID     uint64 `form:"user_id" banding:"required"`
 	VideoId    uint64 `form:"video_id" banding:"required"`
 	ActionType string `form:"action_type" banding:"required"`
-	like       bool
 }
 
 const (
@@ -25,6 +23,8 @@ func (ctl *Controller) FavoriteAction(c *gin.Context) {
 	req := &FavoriteActionRequest{}
 	rsp := &service.Response{}
 	err := c.ShouldBindQuery(&req)
+	uc, _ := ctl.getUserClaims(c)
+	like := false
 	if err != nil {
 		rsp.StatusCode = -1
 		rsp.StatusMsg = err.Error()
@@ -33,17 +33,18 @@ func (ctl *Controller) FavoriteAction(c *gin.Context) {
 	}
 	switch req.ActionType {
 	case FavoriteActionTypeLike:
-		req.like = true
+		like = true
 	case FavoriteActionTypeDislike:
-		req.like = false
+		like = false
 	default:
 		rsp.StatusCode = -1
 		rsp.StatusMsg = "action_type error"
 		c.JSON(http.StatusOK, rsp)
 		return
 	}
-	*rsp = ctl.service.LikeDisliakeVideo(req.UserID, req.VideoId, req.like)
-	c.JSON(http.StatusOK, rsp)
+	ctl.logger.Sugar().Debugf("user_id: %d, video_id: %d, action_type: %s,like: %s", uc.UserID, req.VideoId, req.ActionType, like)
+	rsp = ctl.service.LikeDisliakeVideo(uc.UserID, req.VideoId, like)
+	c.JSON(http.StatusOK, *rsp)
 }
 
 type FavoriteListResponse struct {
@@ -62,6 +63,6 @@ func (ctl *Controller) FavoriteList(c *gin.Context) {
 			StatusMsg:  err.Error(),
 		})
 	}
-	rsp.VideoListResponse = ctl.service.GetLikeList(req.UserID)
+	rsp.VideoListResponse = *ctl.service.GetLikeList(req.UserID)
 	c.JSON(http.StatusOK, rsp)
 }

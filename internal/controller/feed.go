@@ -13,10 +13,18 @@ import (
 // Feed same demo video list for every request
 func (ctl *Controller) Feed(c *gin.Context) {
 	isnew := true
-	lasttimestring := c.Query("lasttimestamp")
+	lasttimestring := c.Query("latest_time")
 	lasttimestamp := 0
-	var lastestTime time.Time
+	var isTourist bool
+	userid := uint64(0)
+	uc, e := ctl.getUserClaims(c)
+	if !e {
+		isTourist = true
+	} else {
+		userid = uc.UserID
+	}
 	var err error
+	var lastestTime time.Time
 	if lasttimestring != "" {
 		lasttimestamp, err = strconv.Atoi(lasttimestring)
 		if err != nil {
@@ -27,12 +35,13 @@ func (ctl *Controller) Feed(c *gin.Context) {
 			})
 			return
 		}
-		lastestTime = time.Unix(int64(lasttimestamp), 0)
+		ctl.logger.Sugar().Debugf("lasttimestamp: %d", lasttimestamp)
+		lastestTime = time.UnixMilli(int64(lasttimestamp))
 		isnew = false
 	}
 
 	var rsp service.FeedResponse
-	r, err := ctl.service.GetFeed(context.Background(), isnew, lastestTime)
+	r, err := ctl.service.GetFeed(context.Background(), userid, isnew, isTourist, lastestTime)
 	if err != nil {
 		rsp.Response = service.Response{
 			StatusCode: -1,
@@ -41,7 +50,5 @@ func (ctl *Controller) Feed(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, rsp)
 		return
 	}
-	rsp.Response = r.Response
-	rsp.VideoList = r.VideoList
-	c.JSON(http.StatusOK, rsp)
+	c.JSON(http.StatusOK, r)
 }
