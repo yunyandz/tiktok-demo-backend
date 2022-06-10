@@ -17,29 +17,23 @@ func InitRouter(logger *zap.Logger, r *gin.Engine, ctl *controller.Controller) {
 	apiRouter.GET("/feed/", middleware.JWTAuth(logger, false), ctl.Feed)
 
 	// using jwt auth
-	apiRouter.GET("/user", middleware.JWTAuth(logger, true), ctl.UserInfo)
-	apiRouter.GET("/user/", middleware.JWTAuth(logger, true), ctl.UserInfo)
+	apiRouter.GET("/user/", middleware.JWTAuth(logger, false), ctl.UserInfo)
 
-	apiRouter.POST("/user/register", ctl.Register)
-	apiRouter.POST("/user/login", ctl.Login)
-	//fix 307
 	apiRouter.POST("/user/register/", ctl.Register)
 	apiRouter.POST("/user/login/", ctl.Login)
 
 	apiRouter.POST("/publish/action/", middleware.JWTAuth(logger, true), ctl.Publish)
-	apiRouter.GET("/publish/list/", middleware.JWTAuth(logger, true), ctl.PublishList)
+	apiRouter.GET("/publish/list/", middleware.JWTAuth(logger, false), ctl.PublishList)
 
 	// extra apis - I
 	apiRouter.POST("/favorite/action/", middleware.JWTAuth(logger, true), ctl.FavoriteAction)
-	apiRouter.GET("/favorite/list/", middleware.JWTAuth(logger, true), ctl.FavoriteList)
+	apiRouter.GET("/favorite/list/", middleware.JWTAuth(logger, false), ctl.FavoriteList)
 
-	apiRouter.POST("/comment/action", middleware.JWTAuth(logger, true), ctl.CommentAction)
-	apiRouter.GET("/comment/list", ctl.CommentList)
 	apiRouter.POST("/comment/action/", middleware.JWTAuth(logger, true), ctl.CommentAction)
-	apiRouter.GET("/comment/list/", ctl.CommentList)
+	apiRouter.GET("/comment/list/", middleware.JWTAuth(logger, false), ctl.CommentList)
 
 	// extra apis - II
 	apiRouter.POST("/relation/action/", middleware.JWTAuth(logger, true), ctl.RelationAction)
-	apiRouter.GET("/relation/follow/list/", middleware.JWTAuth(logger, true), ctl.FollowList)
-	apiRouter.GET("/relation/follower/list/", ctl.FollowerList)
+	apiRouter.GET("/relation/follow/list/", middleware.JWTAuth(logger, false), ctl.FollowList)
+	apiRouter.GET("/relation/follower/list/", middleware.JWTAuth(logger, false), ctl.FollowerList)
 }

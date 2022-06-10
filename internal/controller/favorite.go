@@ -63,6 +63,11 @@ func (ctl *Controller) FavoriteList(c *gin.Context) {
 			StatusMsg:  err.Error(),
 		})
 	}
-	rsp.VideoListResponse = *ctl.service.GetLikeList(req.UserID)
+	selfId := uint64(0)
+	uc, e := ctl.getUserClaims(c)
+	if e {
+		selfId = uc.UserID
+	}
+	rsp.VideoListResponse = *ctl.service.GetLikeList(selfId, req.UserID)
 	c.JSON(http.StatusOK, rsp)
 }

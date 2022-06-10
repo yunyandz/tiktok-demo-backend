@@ -17,4 +17,6 @@ var (
 	ErrNotVideo             = errors.New("不是视频文件")
 	ErrUserAlreadyLikeVideo = errors.New("用户已经点赞过该视频")
 	ErrUserNotLikeVideo     = errors.New("用户没有点赞过该视频")
+
+	ErrPermissionDenied = errors.New("权限不足")
 )

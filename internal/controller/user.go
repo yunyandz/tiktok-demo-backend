@@ -110,7 +110,13 @@ func (ctl *Controller) UserInfo(c *gin.Context) {
 		return
 	}
 
-	r, err := ctl.service.GetUserInfo(req.UserID)
+	selfId := uint64(0)
+	uc, e := ctl.getUserClaims(c)
+	if e {
+		selfId = uc.UserID
+	}
+
+	r, err := ctl.service.GetUserInfo(selfId, req.UserID)
 	if err != nil {
 		rsp.Response = service.Response{
 			StatusCode: -1,

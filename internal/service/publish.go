@@ -117,7 +117,7 @@ func (s *Service) PreSignUrl(filename *string) (string, error) {
 }
 
 func (s *Service) PutVideoInfoToRedis(ctx context.Context, video *model.Video) {
-	su, err := s.GetUserInfo(video.AuthorID)
+	su, err := s.GetUserInfo(0, video.AuthorID)
 	if err != nil {
 		s.logger.Sugar().Errorf("get user info failed: %s", err.Error())
 		return

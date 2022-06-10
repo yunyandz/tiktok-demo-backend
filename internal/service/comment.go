@@ -33,7 +33,7 @@ func (s *Service) PublishComment(userId uint64, videoId uint64, content string) 
 		return nil, errorx.ErrInternalBusy
 	}
 	// User数据库查找评论用户信息失败
-	r, err := s.GetUserInfo(userId)
+	r, err := s.GetUserInfo(userId, userId)
 	if err != nil {
 		return nil, errorx.ErrUserDoesNotExists
 	}
@@ -50,11 +50,15 @@ func (s *Service) PublishComment(userId uint64, videoId uint64, content string) 
 	return &rsp, nil
 }
 
-func (s *Service) DeleteComment(commentId uint64) (*CommentActionResponse, error) {
+func (s *Service) DeleteComment(selfId uint64, commentId uint64) (*CommentActionResponse, error) {
 	videoModel := model.NewVideoModel(s.db, s.rds)
 	comment, err := videoModel.FindAComment(commentId)
 	if err != nil {
 		return nil, errorx.ErrCommentDoesNotExists
+	}
+
+	if comment.UserID != selfId {
+		return nil, errorx.ErrPermissionDenied
 	}
 
 	err = videoModel.DeleteAComment(commentId)
@@ -64,7 +68,7 @@ func (s *Service) DeleteComment(commentId uint64) (*CommentActionResponse, error
 		return nil, errorx.ErrInternalBusy
 	}
 
-	r, err := s.GetUserInfo(comment.UserID)
+	r, err := s.GetUserInfo(selfId, comment.UserID)
 	// User数据库查找用户失败
 	if err != nil {
 		return nil, errorx.ErrUserDoesNotExists
@@ -82,7 +86,7 @@ func (s *Service) DeleteComment(commentId uint64) (*CommentActionResponse, error
 	return &rsp, nil
 }
 
-func (s *Service) GetCommentList(videoId uint64) (*CommentListResponse, error) {
+func (s *Service) GetCommentList(selfId uint64, videoId uint64) (*CommentListResponse, error) {
 	videoModel := model.NewVideoModel(s.db, s.rds)
 	comments, err := videoModel.GetVideoComments(videoId)
 	if err != nil {
@@ -92,7 +96,7 @@ func (s *Service) GetCommentList(videoId uint64) (*CommentListResponse, error) {
 	var commentList []Comment
 	for i := 0; i < len(comments); i++ {
 		commentA := comments[i]
-		r, err := s.GetUserInfo(commentA.UserID)
+		r, err := s.GetUserInfo(selfId, commentA.UserID)
 		// User数据库查找用户失败
 		if err != nil {
 			return nil, errorx.ErrUserDoesNotExists

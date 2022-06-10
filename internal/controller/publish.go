@@ -6,7 +6,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/yunyandz/tiktok-demo-backend/internal/errorx"
-	"github.com/yunyandz/tiktok-demo-backend/internal/jwtx"
 	"github.com/yunyandz/tiktok-demo-backend/internal/service"
 )
 
@@ -47,18 +46,27 @@ func (ctl *Controller) Publish(c *gin.Context) {
 	})
 }
 
+type PublishListRequest struct {
+	UserID uint64 `json:"user_id"`
+}
+
 func (ctl *Controller) PublishList(c *gin.Context) {
 	var rsp service.VideoListResponse
-	uc, e := c.Get("claims")
-	if !e {
-		ctl.logger.Sugar().Errorf("Get claims error: %v", e)
-		c.JSON(http.StatusUnauthorized, service.Response{
+	selfId := uint64(0)
+	uc, e := ctl.getUserClaims(c)
+	if e {
+		selfId = uc.UserID
+	}
+	var req PublishListRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		ctl.logger.Sugar().Errorf("ShouldBindJSON error: %v", err)
+		c.JSON(http.StatusBadRequest, service.Response{
 			StatusCode: -1,
-			StatusMsg:  errorx.ErrInvalidToken.Error(),
+			StatusMsg:  errorx.ErrReadVideo.Error(),
 		})
 		return
 	}
-	r := ctl.service.GetVideoList(context.Background(), uc.(*jwtx.UserClaims).UserID)
+	r := ctl.service.GetVideoList(context.Background(), selfId, req.UserID)
 	rsp.Response = r.Response
 	rsp.VideoList = r.VideoList
 	c.JSON(http.StatusOK, rsp)

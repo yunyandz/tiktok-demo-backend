@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/yunyandz/tiktok-demo-backend/internal/jwtx"
@@ -49,41 +48,6 @@ func JWTAuth(logger *zap.Logger, strict bool) gin.HandlerFunc {
 				c.Next()
 			}
 			return
-		}
-
-		suid := c.Query("user_id")
-		if suid != "" || len(suid) != 0 {
-			uid, err := strconv.ParseUint(suid, 10, 64)
-			if err != nil {
-				if strict {
-					rsp := service.Response{
-						StatusCode: -1,
-						StatusMsg:  "Invalid user_id",
-					}
-					logger.Sugar().Errorf("Invalid user_id: %v", rsp)
-					c.JSON(http.StatusNonAuthoritativeInfo, rsp)
-					c.Abort()
-				} else {
-					c.Next()
-				}
-				return
-			}
-
-			// 检查userid是否正确
-			if parsedToken.UserID != uid {
-				if strict {
-					rsp := service.Response{
-						StatusCode: -1,
-						StatusMsg:  "Invalid user_id",
-					}
-					logger.Sugar().Errorf("Invalid user_id: %v", rsp)
-					c.JSON(http.StatusNonAuthoritativeInfo, rsp)
-					c.Abort()
-				} else {
-					c.Next()
-				}
-				return
-			}
 		}
 
 		c.Set("claims", parsedToken)

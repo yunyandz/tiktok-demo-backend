@@ -136,7 +136,7 @@ func (s *Service) UnFollow(userId uint64, to_userId uint64) Response {
 	return Response{StatusCode: 0, StatusMsg: "UnFollow succeed"}
 }
 
-func (s *Service) GetFollowList(userId uint64) UserListResponse {
+func (s *Service) GetFollowList(selfId uint64, userId uint64) UserListResponse {
 	userModel := model.NewUserModel(s.db, s.rds)
 	followList, err := userModel.GetFollowList(userId)
 	if err != nil {
@@ -156,7 +156,7 @@ func (s *Service) GetFollowList(userId uint64) UserListResponse {
 	}
 }
 
-func (s *Service) GetFollowerList(userId uint64) UserListResponse {
+func (s *Service) GetFollowerList(selfId uint64, userId uint64) UserListResponse {
 	userModel := model.NewUserModel(s.db, s.rds)
 	followList, err := userModel.GetFollowerList(userId)
 	if err != nil {
@@ -176,14 +176,14 @@ func (s *Service) GetFollowerList(userId uint64) UserListResponse {
 	}
 }
 
-func (s *Service) GetUserInfo(UserID uint64) (*UserResponse, error) {
+func (s *Service) GetUserInfo(selfId uint64, UserID uint64) (*UserResponse, error) {
 	userModel := model.NewUserModel(s.db, s.rds)
 	user, err := userModel.GetUser(UserID)
 	if err != nil {
 		return nil, errorx.ErrUserDoesNotExists
 	}
 
-	u, err := s.convertUserModelToUser(UserID, user)
+	u, err := s.convertUserModelToUser(selfId, user)
 	if err != nil {
 		return nil, err
 	}

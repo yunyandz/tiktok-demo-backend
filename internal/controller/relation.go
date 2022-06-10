@@ -62,7 +62,13 @@ func (ctl *Controller) FollowList(c *gin.Context) {
 		return
 	}
 
-	rsp := ctl.service.GetFollowList(req.UserId)
+	selfId := uint64(0)
+	uc, e := ctl.getUserClaims(c)
+	if e {
+		selfId = uc.UserID
+	}
+
+	rsp := ctl.service.GetFollowList(selfId, req.UserId)
 	c.JSON(http.StatusOK, rsp)
 }
 
@@ -79,6 +85,12 @@ func (ctl *Controller) FollowerList(c *gin.Context) {
 		return
 	}
 
-	rsp := ctl.service.GetFollowerList(req.UserId)
+	selfId := uint64(0)
+	uc, e := ctl.getUserClaims(c)
+	if e {
+		selfId = uc.UserID
+	}
+
+	rsp := ctl.service.GetFollowerList(selfId, req.UserId)
 	c.JSON(http.StatusOK, rsp)
 }

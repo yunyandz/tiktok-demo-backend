@@ -44,7 +44,7 @@ func (s *Service) LikeDisliakeVideo(userId uint64, videoId uint64, like bool) *R
 	return &Response{StatusCode: 0}
 }
 
-func (s *Service) GetVideoList(ctx context.Context, userId uint64) *VideoListResponse {
+func (s *Service) GetVideoList(ctx context.Context, selfId uint64, userId uint64) *VideoListResponse {
 	vm := model.NewVideoModel(s.db, s.rds)
 	videos, err := vm.GetVideosByUser(userId)
 	if err != nil {
@@ -57,7 +57,7 @@ func (s *Service) GetVideoList(ctx context.Context, userId uint64) *VideoListRes
 		}
 	}
 	// 封装需要的信息
-	res := s.convertVideoModeltoVideo(userId, videos, false)
+	res := s.convertVideoModeltoVideo(selfId, videos, false)
 	return &VideoListResponse{
 		Response: Response{
 			StatusCode: 0,
@@ -67,7 +67,7 @@ func (s *Service) GetVideoList(ctx context.Context, userId uint64) *VideoListRes
 	}
 }
 
-func (s *Service) GetLikeList(userId uint64) *VideoListResponse {
+func (s *Service) GetLikeList(selfId uint64, userId uint64) *VideoListResponse {
 	vido := model.NewVideoModel(s.db, s.rds)
 	videos, err := vido.GetUserLikeVideos(userId)
 	if err != nil {
@@ -81,7 +81,7 @@ func (s *Service) GetLikeList(userId uint64) *VideoListResponse {
 		}
 	}
 	s.logger.Sugar().Debugf("get video success: %v", videos)
-	res := s.convertVideoModeltoVideo(userId, videos, false)
+	res := s.convertVideoModeltoVideo(selfId, videos, false)
 	if err != nil {
 		return &VideoListResponse{
 			Response:  Response{StatusCode: -1, StatusMsg: err.Error()},

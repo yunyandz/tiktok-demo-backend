@@ -66,7 +66,7 @@ func (ctl *Controller) CommentAction(c *gin.Context) {
 		rsp.Comment = r.Comment
 		c.JSON(http.StatusOK, rsp)
 	case CommentActionTypeDelete:
-		r, err := ctl.service.DeleteComment(req.CommentID)
+		r, err := ctl.service.DeleteComment(claims.UserID, req.CommentID)
 		if err != nil {
 			rsp.Response = service.Response{
 				StatusCode: -1,
@@ -110,7 +110,12 @@ func (ctl *Controller) CommentList(c *gin.Context) {
 		}
 		c.JSON(http.StatusBadRequest, rsp)
 	}
-	r, err := ctl.service.GetCommentList(req.VideoID)
+	selfId := uint64(0)
+	uc, e := ctl.getUserClaims(c)
+	if e {
+		selfId = uc.UserID
+	}
+	r, err := ctl.service.GetCommentList(selfId, req.VideoID)
 	if err != nil {
 		rsp.Response = service.Response{
 			StatusCode: -1,
