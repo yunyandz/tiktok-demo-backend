@@ -46,6 +46,7 @@ func (s *Service) LikeDisliakeVideo(userId uint64, videoId uint64, like bool) *R
 
 func (s *Service) GetVideoList(ctx context.Context, selfId uint64, userId uint64) *VideoListResponse {
 	vm := model.NewVideoModel(s.db, s.rds)
+	s.logger.Sugar().Debugf("get video list,selfId:%d,userId:%d", selfId, userId)
 	videos, err := vm.GetVideosByUser(userId)
 	if err != nil {
 		s.logger.Sugar().Errorf("get video failed: %s", err.Error())
@@ -136,6 +137,7 @@ func (s *Service) convertVideoModeltoVideoWithNextTime(selfid uint64, videos []*
 		vid.CommentCount = v.Commentcount
 
 		res[i] = vid
+		s.logger.Sugar().Debugf("get video success: %v", vid)
 
 		if v.CreatedAt.Before(nextTime) {
 			nextTime = v.CreatedAt

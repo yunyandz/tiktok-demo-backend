@@ -100,7 +100,7 @@ func (v *VideoModel) GetVideo(videoId uint64) (*Video, error) {
 // 获取用户的视频列表
 func (v *VideoModel) GetVideosByUser(userId uint64) ([]*Video, error) {
 	var videos []*Video
-	if err := v.db.Where("author_id = ?", userId).Find(&videos).Error; err != nil {
+	if err := v.db.Raw("SELECT * FROM videos WHERE author_id = ?", userId).Scan(&videos).Error; err != nil {
 		return nil, err
 	}
 	return videos, nil

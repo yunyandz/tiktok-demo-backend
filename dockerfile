@@ -9,7 +9,7 @@ COPY go.mod go.sum ./
 RUN go mod download && go mod verify
 
 COPY . .
-RUN CGO_ENABLED=0 go build -v -o tiktok_demo
+RUN CGO_ENABLED=0 go build -v -o tiktok_demo ./cmd/
 
 ##
 ## Build
@@ -17,7 +17,7 @@ RUN CGO_ENABLED=0 go build -v -o tiktok_demo
 FROM alpine:3.14
 
 WORKDIR /root/
-COPY --from=builder /app/tiktok_demo ./tiktok_demo
+COPY --from=builder /app/cmd/tiktok_demo ./tiktok_demo
 
 EXPOSE 8080
 

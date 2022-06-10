@@ -47,7 +47,7 @@ func (ctl *Controller) Publish(c *gin.Context) {
 }
 
 type PublishListRequest struct {
-	UserID uint64 `json:"user_id"`
+	UserID uint64 `form:"user_id"`
 }
 
 func (ctl *Controller) PublishList(c *gin.Context) {
@@ -58,7 +58,7 @@ func (ctl *Controller) PublishList(c *gin.Context) {
 		selfId = uc.UserID
 	}
 	var req PublishListRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := c.ShouldBindQuery(&req); err != nil {
 		ctl.logger.Sugar().Errorf("ShouldBindJSON error: %v", err)
 		c.JSON(http.StatusBadRequest, service.Response{
 			StatusCode: -1,
