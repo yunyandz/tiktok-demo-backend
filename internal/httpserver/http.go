@@ -9,6 +9,7 @@ import (
 	"github.com/yunyandz/tiktok-demo-backend/internal/controller"
 	"github.com/yunyandz/tiktok-demo-backend/internal/httpserver/router"
 
+	"github.com/gin-contrib/pprof"
 	ginzap "github.com/gin-contrib/zap"
 	"go.uber.org/zap"
 )
@@ -18,6 +19,10 @@ func Run(config *config.Config, controller *controller.Controller, logger *zap.L
 		gin.SetMode(gin.ReleaseMode)
 	}
 	r := gin.Default()
+
+	if config.Debug {
+		pprof.Register(r)
+	}
 
 	r.Use(ginzap.Ginzap(logger, time.RFC3339, true))
 

@@ -9,7 +9,6 @@ import (
 
 func InitRouter(logger *zap.Logger, r *gin.Engine, ctl *controller.Controller) {
 	// public directory is used to serve static resources
-	r.Static("/static", "./public")
 
 	apiRouter := r.Group("/douyin")
 
