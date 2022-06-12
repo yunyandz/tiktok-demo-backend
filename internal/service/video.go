@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"sort"
 	"time"
 
 	"github.com/yunyandz/tiktok-demo-backend/internal/model"
@@ -57,6 +58,7 @@ func (s *Service) GetVideoList(ctx context.Context, selfId uint64, userId uint64
 			},
 		}
 	}
+	s.sortVideosByTime(videos)
 	// 封装需要的信息
 	res := s.convertVideoModeltoVideo(selfId, videos, false)
 	return &VideoListResponse{
@@ -149,4 +151,10 @@ func (s *Service) convertVideoModeltoVideoWithNextTime(selfid uint64, videos []*
 func (s *Service) isFavorite(userId uint64, videoId uint64) (bool, error) {
 	vid := model.NewVideoModel(s.db, s.rds)
 	return vid.IsFavorite(userId, videoId)
+}
+
+func (s *Service) sortVideosByTime(videos []*model.Video) {
+	sort.Slice(videos, func(i, j int) bool {
+		return videos[i].CreatedAt.After(videos[j].CreatedAt)
+	})
 }
