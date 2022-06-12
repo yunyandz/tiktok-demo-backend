@@ -1,4 +1,8 @@
 # tiktok-demo-backend
+![GitHub](https://img.shields.io/github/license/yunyandz/tiktok-demo-backend?style=for-the-badge)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/yunyandz/tiktok-demo-backend/Docker%20Image%20CI?style=for-the-badge)
+![GitHub top language](https://img.shields.io/github/languages/top/yunyandz/tiktok-demo-backend?style=for-the-badge)
+
 
 ## 抖音项目服务端demo
 
@@ -6,14 +10,14 @@
 来自4396-云研顶针组。
 基于gin/gorm/s3的抖音项目服务端。
 
-# 运行
+## 运行
 ``` bash
 git clone https://github.com/yunyandz/tiktok-demo-backend.git
 cd tiktok-demo-backend
 docker compose up -d
 ```
 
-# 关于项目结构
+## 关于项目结构
 项目采用了典型的三层结构，以达到更好的组织和管理。
 
 整体部分采用了依赖，即依赖注入，使得模块的耦合性更低，更容易编写测试用例和维护。
