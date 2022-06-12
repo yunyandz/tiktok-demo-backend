@@ -38,7 +38,14 @@ func (ctl *Controller) Publish(c *gin.Context) {
 		return
 	}
 	title := c.PostForm("title")
-	// TODO: 判断文件类型是否为视频文件
+	if data.Header.Get("Content-Type") != "video/mp4" {
+		ctl.logger.Sugar().Errorf("data.Header.Get(Content-Type) error: %v", err)
+		c.JSON(http.StatusBadRequest, service.Response{
+			StatusCode: -1,
+			StatusMsg:  errorx.ErrReadVideo.Error(),
+		})
+		return
+	}
 	res := ctl.service.PublishVideo(context.Background(), uc.UserID, data.Filename, file, title)
 	c.JSON(http.StatusOK, service.Response{
 		StatusCode: res.StatusCode,
