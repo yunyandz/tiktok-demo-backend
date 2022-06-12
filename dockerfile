@@ -17,6 +17,7 @@ RUN CGO_ENABLED=0 go build -v -o tiktok_demo ./cmd/
 FROM alpine:3.14
 
 WORKDIR /root/
+RUN apk add --no-cache ffmpeg
 COPY --from=builder /app/tiktok_demo ./tiktok_demo
 
 EXPOSE 8080
