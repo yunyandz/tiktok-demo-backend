@@ -1,6 +1,8 @@
 package service
 
 import (
+	"sort"
+
 	"github.com/yunyandz/tiktok-demo-backend/internal/errorx"
 	"github.com/yunyandz/tiktok-demo-backend/internal/logger"
 	"github.com/yunyandz/tiktok-demo-backend/internal/model"
@@ -92,6 +94,7 @@ func (s *Service) GetCommentList(selfId uint64, videoId uint64) (*CommentListRes
 	if err != nil {
 		return nil, errorx.ErrCommentDoesNotExists
 	}
+	s.sortCommentByTime(comments)
 
 	var commentList []Comment
 	for i := 0; i < len(comments); i++ {
@@ -120,4 +123,10 @@ func (s *Service) GetCommentList(selfId uint64, videoId uint64) (*CommentListRes
 	}
 
 	return &rsp, nil
+}
+
+func (s *Service) sortCommentByTime(comments []*model.Comment) {
+	sort.Slice(comments, func(i, j int) bool {
+		return comments[i].Model.CreatedAt.After(comments[j].Model.CreatedAt)
+	})
 }
