@@ -1,23 +1,24 @@
 debug: true
 http:
-  host: localhost
+  host: 0.0.0.0
   port: 8080
 redis:
   vaild: true
-  host: localhost
+  host: redis
   port: 6379
   db: 0
   password:
 mysql:
-  host: localhost
+  host: mariadb
   port: 3306
   user: tiktok
   password: tiktok
   database: tiktok
 s3:
   vaild: false
-  accesskey:
-  secretkey:
+  endpoint: 
+  accesskey: 
+  secretkey: 
   bucket: 
   region: 
 kafka:

@@ -1,0 +1,23 @@
+version: "3.9"  # optional since v1.27.0
+services:
+  tiktok:
+    image: ghcr.io/yunyandz/tiktok-demo-backend:latest
+    depends_on:
+      - redis
+      - mariadb
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./config.yaml:/root/config.yaml
+    links:
+      - redis
+      - mariadb
+  redis:  
+    image: redis
+  mariadb:
+    image: mariadb
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=tiktok
+      - MYSQL_USER=tiktok
+      - MYSQL_PASSWORD=tiktok
