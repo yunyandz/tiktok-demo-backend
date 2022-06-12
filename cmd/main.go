@@ -1,6 +1,10 @@
 package main
 
 import (
+	"go.uber.org/fx"
+	"go.uber.org/fx/fxevent"
+	"go.uber.org/zap"
+
 	"github.com/yunyandz/tiktok-demo-backend/internal/config"
 	"github.com/yunyandz/tiktok-demo-backend/internal/controller"
 	"github.com/yunyandz/tiktok-demo-backend/internal/dao/mysql"
@@ -12,18 +16,27 @@ import (
 	"github.com/yunyandz/tiktok-demo-backend/internal/service"
 )
 
-// 这不用依赖注入框架真的好吗。。。
+// 用了 好用
 func main() {
-	cfg, err := config.Phase()
-	if err != nil {
-		panic(err)
-	}
-	mylogger := logger.New(cfg)
-	db := mysql.New(cfg, mylogger)
-	rds := redis.New(cfg, mylogger)
-	pdc := kafka.NewProducer(cfg)
-	s3 := s3.New(cfg, mylogger)
-	ser := service.New(cfg, db, rds, mylogger, pdc, s3)
-	ctl := controller.New(ser, mylogger)
-	httpserver.Run(cfg, ctl, mylogger)
+	app := fx.New(
+		fx.Provide(
+			config.Phase,
+			logger.New,
+			mysql.New,
+			redis.New,
+			kafka.NewProducer,
+			s3.New,
+			service.New,
+			controller.New,
+		),
+		fx.Invoke(
+			httpserver.Run,
+		),
+		fx.WithLogger(
+			func(logger *zap.Logger) fxevent.Logger {
+				return &fxevent.ZapLogger{Logger: logger}
+			},
+		),
+	)
+	app.Run()
 }

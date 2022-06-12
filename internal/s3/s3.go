@@ -23,7 +23,7 @@ var (
 	once     sync.Once
 )
 
-func New(config *config.Config, logger *zap.Logger) *Mys3 {
+func New(config *config.Config, logger *zap.Logger) S3ObjectAPI {
 	if !config.S3.Vaild {
 		return nil
 	}
