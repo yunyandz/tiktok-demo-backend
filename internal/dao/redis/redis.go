@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/yunyandz/tiktok-demo-backend/internal/config"
@@ -28,9 +29,18 @@ func New(cfg *config.Config, logger *zap.Logger) *redis.Client {
 			Password: cfg.Redis.Password,
 			DB:       cfg.Redis.Database,
 		})
-		if _, err := rdb.Ping(context.TODO()).Result(); err != nil {
+		var err error
+		for i := 0; i < 3; i++ {
+			if _, err = rdb.Ping(context.TODO()).Result(); err == nil {
+				break
+			}
+			logger.Error("connect to redis failed", zap.Error(err), zap.Int("retry", i))
+			time.Sleep(time.Second * 3)
+		}
+		if err != nil {
 			panic(err)
 		}
+		logger.Info("connect to redis success")
 		logger.Sugar().Infof("redis connect success, host: %s, database: %d", host, cfg.Redis.Database)
 	})
 	return rdb
