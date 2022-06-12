@@ -87,17 +87,22 @@ func (s *Service) UploadCoverToS3(ctx context.Context, filename string, coverdat
 }
 
 func (s *Service) UploadToS3(ctx context.Context, filename string, data io.Reader, contenttype string) {
-	_, err := s.s3.PutObject(ctx, &s3.PutObjectInput{
+	retrycount := 3
+	po := &s3.PutObjectInput{
 		Bucket:      aws.String(s.cfg.S3.Bucket),
 		Key:         &filename,
 		Body:        data,
 		ContentType: &contenttype,
-	})
-	if err != nil {
-		s.logger.Sugar().Errorf("upload to s3 failed: %s", err.Error())
-		return
 	}
-	s.logger.Sugar().Debugf("upload to s3 success: %s", filename)
+	for i := 0; i < retrycount; i++ {
+		_, err := s.s3.PutObject(ctx, po)
+		if err != nil {
+			s.logger.Sugar().Errorf("upload to s3 failed: %s", err.Error())
+			continue
+		}
+		s.logger.Sugar().Debugf("upload to s3 success: %s", filename)
+		break
+	}
 }
 
 func (s *Service) PreSignUrl(filename *string) (string, error) {
