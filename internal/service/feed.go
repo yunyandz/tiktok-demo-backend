@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"sort"
 	"time"
 
 	"github.com/yunyandz/tiktok-demo-backend/internal/errorx"
@@ -27,6 +28,7 @@ func (s *Service) GetFeed(ctx context.Context, userId uint64, isnew bool, isTour
 		s.logger.Sugar().Errorf("get video failed: %s", err.Error())
 		return nil, errorx.ErrUserOffline
 	}
+	s.sortVideosByTime(videosModel)
 	videos, nt := s.convertVideoModeltoVideoWithNextTime(userId, videosModel, isTour, lasttime)
 	rsp := FeedResponse{
 		Response: Response{
@@ -37,4 +39,10 @@ func (s *Service) GetFeed(ctx context.Context, userId uint64, isnew bool, isTour
 		NextTime:  nt.UnixMilli(),
 	}
 	return &rsp, nil
+}
+
+func (s *Service) sortVideosByTime(videos []*model.Video) {
+	sort.Slice(videos, func(i, j int) bool {
+		return videos[i].CreatedAt.After(videos[j].CreatedAt)
+	})
 }
