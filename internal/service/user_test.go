@@ -65,7 +65,7 @@ func TestService_Login(t *testing.T) {
 func TestService_GetUserInfo(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		s := strconv.Itoa(i)
-		response, err := UserTestSvr.GetUserInfo(uint64(i + 1))
+		response, err := UserTestSvr.GetUserInfo(0, uint64(i+1))
 		require.NoError(t, err)
 		require.NotEmpty(t, response)
 		require.Equal(t, uint64(i+1), response.User.ID)
