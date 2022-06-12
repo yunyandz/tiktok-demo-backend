@@ -1,7 +1,7 @@
 version: "3.9"  # optional since v1.27.0
 services:
   tiktok:
-    image: ghcr.io/yunyandz/tiktok-demo-backend:latest
+    build: .
     depends_on:
       - redis
       - mariadb

@@ -1,16 +1,17 @@
 # tiktok-demo-backend
 
 ## 抖音项目服务端demo
-	
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
 
 字节青训营后端专场抖音项目。
 来自4396-云研顶针组。
 基于gin/gorm/s3的抖音项目服务端。
+
+# 运行
+``` bash
+git clone https://github.com/yunyandz/tiktok-demo-backend.git
+cd tiktok-demo-backend
+docker compose up -d
+```
 
 # 关于项目结构
 项目采用了典型的三层结构，以达到更好的组织和管理。
