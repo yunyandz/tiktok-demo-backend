@@ -19,4 +19,6 @@ var (
 	ErrUserNotLikeVideo     = errors.New("用户没有点赞过该视频")
 
 	ErrPermissionDenied = errors.New("权限不足")
+	ErrCommentTextEmpty = errors.New("评论内容不能为空")
+	ErrCommentIDEmpty   = errors.New("评论ID不能为空")
 )

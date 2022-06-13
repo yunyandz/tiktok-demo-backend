@@ -11,7 +11,7 @@ import (
 
 type CommentActionRequest struct {
 	Token       string `form:"token" binding:"required"`
-	VideoID     uint64 `form:"video_id" binding:"required"`
+	VideoID     uint64 `form:"video_id"`
 	ActionType  uint64 `form:"action_type" binding:"required"` //
 	CommentText string `form:"comment_text"`
 	CommentID   uint64 `form:"comment_id"`
@@ -52,6 +52,14 @@ func (ctl *Controller) CommentAction(c *gin.Context) {
 	claims := uc.(*jwtx.UserClaims)
 	switch req.ActionType {
 	case CommentActionTypePublish:
+		if req.CommentText == "" {
+			rsp.Response = service.Response{
+				StatusCode: -1,
+				StatusMsg:  errorx.ErrCommentTextEmpty.Error(),
+			}
+			c.JSON(http.StatusBadRequest, rsp)
+			return
+		}
 		r, err := ctl.service.PublishComment(claims.UserID, req.VideoID, req.CommentText)
 		if err != nil {
 			rsp.Response = service.Response{
@@ -66,6 +74,14 @@ func (ctl *Controller) CommentAction(c *gin.Context) {
 		rsp.Comment = r.Comment
 		c.JSON(http.StatusOK, rsp)
 	case CommentActionTypeDelete:
+		if req.CommentID == 0 {
+			rsp.Response = service.Response{
+				StatusCode: -1,
+				StatusMsg:  errorx.ErrCommentIDEmpty.Error(),
+			}
+			c.JSON(http.StatusBadRequest, rsp)
+			return
+		}
 		r, err := ctl.service.DeleteComment(claims.UserID, req.CommentID)
 		if err != nil {
 			rsp.Response = service.Response{
