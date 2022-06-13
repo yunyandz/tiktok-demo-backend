@@ -12,7 +12,7 @@ import (
 type Video struct {
 	gorm.Model
 
-	AuthorID uint64 `gorm:"column:author_id"`
+	AuthorID uint64 `gorm:"column:author_id;index"`
 
 	Title       string `gorm:"size:128"`
 	Description string `gorm:"size:1024"`
