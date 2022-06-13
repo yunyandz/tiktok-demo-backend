@@ -11,7 +11,6 @@ import (
 
 func JWTAuth(logger *zap.Logger, strict bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
-
 		// 获取token
 		token := c.Query("token")
 		if token == "" || len(token) == 0 {
@@ -22,7 +21,7 @@ func JWTAuth(logger *zap.Logger, strict bool) gin.HandlerFunc {
 						StatusCode: -1,
 						StatusMsg:  "Invalid token",
 					}
-					logger.Sugar().Errorf("Invalid token: %v", rsp)
+					logger.Sugar().Debugf("Invalid token: %v", rsp)
 					c.JSON(http.StatusUnauthorized, rsp)
 					c.Abort()
 				} else {
@@ -41,7 +40,7 @@ func JWTAuth(logger *zap.Logger, strict bool) gin.HandlerFunc {
 					StatusCode: -1,
 					StatusMsg:  "Parse token failed",
 				}
-				logger.Sugar().Errorf("Parse token failed: %v", rsp)
+				logger.Sugar().Debugf("Parse token failed: %v", rsp)
 				c.JSON(http.StatusNonAuthoritativeInfo, rsp)
 				c.Abort()
 			} else {

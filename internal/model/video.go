@@ -19,8 +19,8 @@ type Video struct {
 	Playurl     string `gorm:"size:1024"`
 	Coverurl    string `gorm:"size:1024"`
 
-	Commentcount uint64
-	Likecount    uint64 `gorm:"default:0"`
+	Commentcount int64
+	Likecount    int64 `gorm:"default:0"`
 
 	Likes    []*User    `gorm:"many2many:user_likes"`
 	Comments []*Comment `gorm:"many2many:video_comments"`

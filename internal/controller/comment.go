@@ -107,7 +107,7 @@ func (ctl *Controller) CommentAction(c *gin.Context) {
 }
 
 type CommentListRequest struct {
-	Token   string `form:"token" binding:"required"`
+	Token   string `form:"token"`
 	VideoID uint64 `form:"video_id" binding:"required"`
 }
 type CommentListResponse struct {
