@@ -142,7 +142,7 @@ func (s *Service) GetFollowList(selfId uint64, userId uint64) UserListResponse {
 			},
 		}
 	}
-	users := s.convertManyUserModelToUser(userId, followList)
+	users := s.convertManyUserModelToUser(selfId, followList)
 	return UserListResponse{
 		Response: Response{
 			StatusCode: 0,
@@ -162,7 +162,7 @@ func (s *Service) GetFollowerList(selfId uint64, userId uint64) UserListResponse
 			},
 		}
 	}
-	users := s.convertManyUserModelToUser(userId, followList)
+	users := s.convertManyUserModelToUser(selfId, followList)
 	return UserListResponse{
 		Response: Response{
 			StatusCode: 0,
