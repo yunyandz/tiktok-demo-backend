@@ -25,8 +25,7 @@ func (v *VideoModel) GetVideoComments(id uint64) ([]*Comment, error) {
 func (v *VideoModel) CreateAComment(videoId uint64, userId uint64, content string) (*Comment, error) {
 	comment := Comment{UserID: userId, VideoID: videoId, Content: content}
 	err := v.db.Transaction(func(tx *gorm.DB) error {
-		err := tx.Create(&comment).Error
-		if err != nil {
+		if err := tx.Create(&comment).Error; err != nil {
 			return err
 		}
 		if err := tx.Model(&Video{}).Where("id = ?", videoId).
