@@ -1,7 +1,6 @@
 package model
 
 import (
-	"github.com/yunyandz/tiktok-demo-backend/internal/errorx"
 	"gorm.io/gorm"
 )
 
@@ -63,15 +62,15 @@ func (v *VideoModel) FindAComment(commentId uint64) (*Comment, error) {
 // 删除一个评论
 func (v *VideoModel) DeleteAComment(commentId uint64) error {
 	err := v.db.Transaction(func(tx *gorm.DB) error {
-		de := tx.Delete(&Comment{}, commentId)
-		if err := de.Error; err != nil {
+		var comment Comment
+		if err := tx.First(&comment, commentId).Error; err != nil {
 			return err
 		}
-		if de.RowsAffected == 0 {
-			return errorx.ErrCommentDoesNotExists
-		}
-		if err := tx.Model(&Video{}).Where("id = ?", commentId).
+		if err := tx.Model(&Video{}).Where("id = ?", comment.VideoID).
 			Update("commentcount", gorm.Expr("commentcount - ?", 1)).Error; err != nil {
+			return err
+		}
+		if err := tx.Delete(&comment, commentId).Error; err != nil {
 			return err
 		}
 		return nil
