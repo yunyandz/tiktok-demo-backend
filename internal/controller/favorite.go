@@ -19,7 +19,6 @@ const (
 
 // FavoriteAction 用户点赞操作
 func (ctl *Controller) FavoriteAction(c *gin.Context) {
-	// token := c.Query("token")
 	req := &FavoriteActionRequest{}
 	rsp := &service.Response{}
 	err := c.ShouldBindQuery(&req)

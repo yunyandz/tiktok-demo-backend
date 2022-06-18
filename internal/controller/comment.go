@@ -10,7 +10,6 @@ import (
 )
 
 type CommentActionRequest struct {
-	Token       string `form:"token" binding:"required"`
 	VideoID     uint64 `form:"video_id"`
 	ActionType  uint64 `form:"action_type" binding:"required"` //
 	CommentText string `form:"comment_text"`
@@ -27,7 +26,6 @@ const (
 )
 
 func (ctl *Controller) CommentAction(c *gin.Context) {
-	// token := c.Query("token")
 	var req CommentActionRequest
 	var rsp CommentActionResponse
 	err := c.ShouldBindQuery(&req)
@@ -107,7 +105,6 @@ func (ctl *Controller) CommentAction(c *gin.Context) {
 }
 
 type CommentListRequest struct {
-	Token   string `form:"token"`
 	VideoID uint64 `form:"video_id" binding:"required"`
 }
 type CommentListResponse struct {

@@ -89,7 +89,6 @@ func (ctl *Controller) Login(c *gin.Context) {
 
 type UserInfoRequest struct {
 	UserID uint64 `form:"user_id" binding:"required"`
-	Token  string `form:"token" binding:"required"`
 }
 
 type UserInfoResponse struct {

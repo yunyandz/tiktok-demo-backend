@@ -8,7 +8,6 @@ import (
 )
 
 type RealationRequest struct {
-	Token      string `form:"token" binding:"required"`
 	ToUserId   uint64 `form:"to_user_id" binding:"required"`
 	ActionType int8   `form:"action_type" binding:"required"`
 }
@@ -19,7 +18,6 @@ const (
 )
 
 func (ctl *Controller) RelationAction(c *gin.Context) {
-	// token := c.Query("token")
 	var req RealationRequest
 	err := c.ShouldBind(&req)
 	uc, _ := ctl.getUserClaims(c)
@@ -46,7 +44,6 @@ func (ctl *Controller) RelationAction(c *gin.Context) {
 
 type FollowRequest struct {
 	UserId uint64 `form:"user_id" binding:"required"`
-	Token  string `form:"token" binding:"required"`
 }
 
 func (ctl *Controller) FollowList(c *gin.Context) {
