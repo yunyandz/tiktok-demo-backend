@@ -25,9 +25,9 @@ type CommentActionResponse struct {
 	Comment Comment `json: "comment"`
 }
 
-func (s *Service) PublishComment(userId uint64, videoId uint64, content string) (*CommentActionResponse, error) {
+func (s *Service) PublishComment(selfId uint64, videoId uint64, content string) (*CommentActionResponse, error) {
 	videoModel := model.NewVideoModel(s.db, s.rds)
-	comment, err := videoModel.CreateAComment(videoId, userId, content)
+	comment, err := videoModel.CreateAComment(videoId, selfId, content)
 
 	// Video数据库写入评论失败
 	if err != nil {
@@ -35,7 +35,7 @@ func (s *Service) PublishComment(userId uint64, videoId uint64, content string) 
 		return nil, errorx.ErrInternalBusy
 	}
 	// User数据库查找评论用户信息失败
-	r, err := s.GetUserInfo(userId, userId)
+	r, err := s.GetUserInfo(selfId, selfId)
 	if err != nil {
 		return nil, errorx.ErrUserDoesNotExists
 	}

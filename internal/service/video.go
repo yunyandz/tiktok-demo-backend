@@ -24,11 +24,11 @@ type VideoListResponse struct {
 	VideoList []Video `json:"video_list"`
 }
 
-func (s *Service) LikeDisliakeVideo(userId uint64, videoId uint64, like bool) *Response {
+func (s *Service) LikeDisliakeVideo(selfId uint64, videoId uint64, like bool) *Response {
 	rsp := Response{}
 	vid := model.NewVideoModel(s.db, s.rds)
 	if like {
-		err := vid.LikeVideo(userId, videoId)
+		err := vid.LikeVideo(selfId, videoId)
 		if err != nil {
 			rsp.StatusCode = -1
 			rsp.StatusMsg = err.Error()
@@ -36,7 +36,7 @@ func (s *Service) LikeDisliakeVideo(userId uint64, videoId uint64, like bool) *R
 		}
 		return &Response{StatusCode: 0}
 	}
-	err := vid.UnLikeVideo(userId, videoId)
+	err := vid.UnLikeVideo(selfId, videoId)
 	if err != nil {
 		rsp.StatusCode = -1
 		rsp.StatusMsg = err.Error()

@@ -14,7 +14,7 @@ type FeedResponse struct {
 	NextTime  int64   `json:"next_time,omitempty"`
 }
 
-func (s *Service) GetFeed(ctx context.Context, userId uint64, isnew bool, isTour bool, lasttime time.Time) (*FeedResponse, error) {
+func (s *Service) GetFeed(ctx context.Context, selfId uint64, isnew bool, isTour bool, lasttime time.Time) (*FeedResponse, error) {
 	vm := model.NewVideoModel(s.db, s.rds)
 	var videosModel []*model.Video
 	var err error
@@ -28,7 +28,7 @@ func (s *Service) GetFeed(ctx context.Context, userId uint64, isnew bool, isTour
 		return nil, errorx.ErrUserOffline
 	}
 	s.sortVideosByTime(videosModel)
-	videos, nt := s.convertVideoModeltoVideoWithNextTime(userId, videosModel, isTour, lasttime)
+	videos, nt := s.convertVideoModeltoVideoWithNextTime(selfId, videosModel, isTour, lasttime)
 	rsp := FeedResponse{
 		Response: Response{
 			StatusCode: 0,

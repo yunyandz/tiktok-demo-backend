@@ -20,7 +20,7 @@ import (
 )
 
 // 上传video的部分，上传到s3是异步的，所以这里不需要等待立刻返回
-func (s *Service) PublishVideo(ctx context.Context, UserID uint64, filename string, videodata io.Reader, title string) Response {
+func (s *Service) PublishVideo(ctx context.Context, selfId uint64, filename string, videodata io.Reader, title string) Response {
 	playurl := ""
 	coverurl := ""
 	filename = strings.Join([]string{s.Hash([]byte(filename + title)), filename}, "-")
@@ -47,7 +47,7 @@ func (s *Service) PublishVideo(ctx context.Context, UserID uint64, filename stri
 		coverurl = util.GetRawUrl(curl)
 	}
 	video := model.Video{
-		AuthorID: UserID,
+		AuthorID: selfId,
 		Title:    title,
 		Playurl:  playurl,
 		Coverurl: coverurl,
