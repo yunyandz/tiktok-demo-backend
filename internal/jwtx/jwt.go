@@ -7,14 +7,23 @@ import (
 
 	"github.com/yunyandz/tiktok-demo-backend/internal/logger"
 
+	"crypto/rand"
+
 	"github.com/dgrijalva/jwt-go"
 )
 
 const (
 	EXPIRES_TIME = 3600 // s
 	ISSUER       = "x"
-	SIGNED_KEY   = "666666"
 )
+
+var SIGNED_KEY string
+
+func init() {
+	bytes := make([]byte, 32)
+	rand.Read(bytes)
+	SIGNED_KEY = string(bytes)
+}
 
 type UserInfo struct {
 	Username string `json:"username"`
