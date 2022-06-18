@@ -100,7 +100,7 @@ func (v *VideoModel) GetVideo(videoId uint64) (*Video, error) {
 // 获取用户的视频列表
 func (v *VideoModel) GetVideosByUser(userId uint64) ([]*Video, error) {
 	var videos []*Video
-	if err := v.db.Raw("SELECT * FROM videos WHERE author_id = ?", userId).Scan(&videos).Error; err != nil {
+	if err := v.db.Raw("SELECT * FROM videos WHERE author_id = ? ORDER BY created_at DESC", userId).Scan(&videos).Error; err != nil {
 		return nil, err
 	}
 	return videos, nil
@@ -147,15 +147,6 @@ func (v *VideoModel) UnLikeVideo(userId uint64, videoId uint64) error {
 		return err
 	}
 	return nil
-}
-
-// 获取视频的点赞数
-func (v *VideoModel) GetVideoLikesCount(id uint64) (int64, error) {
-	var count int64
-	if err := v.db.Model(&Video{}).Where("id = ?", id).Count(&count).Error; err != nil {
-		return 0, err
-	}
-	return count, nil
 }
 
 //查询视频点赞
