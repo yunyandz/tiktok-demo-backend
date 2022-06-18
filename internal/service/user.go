@@ -9,11 +9,6 @@ import (
 )
 
 type User struct {
-	//Id            uint64 `json:"id,omitempty"`
-	//Name          string `json:"name,omitempty"`
-	//FollowCount   uint32 `json:"follow_count,omitempty"`
-	//FollowerCount uint32 `json:"follower_count,omitempty"`
-
 	ID            uint64 `json:"id"`
 	Username      string `json:"name"`
 	FollowCount   int64  `json:"follow_count"`

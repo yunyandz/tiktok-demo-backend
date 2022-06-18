@@ -35,7 +35,11 @@ func New(cfg *config.Config, lg *zap.Logger) *gorm.DB {
 		logger := zapgorm2.New(lg)
 		logger.SetAsDefault()
 		for i := 0; i < 3; i++ {
-			db, err = gorm.Open(mysql.New(mysqlconfig), &gorm.Config{Logger: logger})
+			db, err = gorm.Open(mysql.New(mysqlconfig), &gorm.Config{
+				Logger:                                   logger,
+				SkipDefaultTransaction:                   true,
+				DisableForeignKeyConstraintWhenMigrating: true,
+			})
 			if err == nil {
 				break
 			}
