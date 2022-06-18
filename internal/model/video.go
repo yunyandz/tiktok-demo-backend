@@ -82,7 +82,7 @@ func (v *VideoModel) GetNewVideos() ([]*Video, error) {
 // 获取指定时间戳之前创建时间的视频列表。这里依然是最多返回30条。
 func (v *VideoModel) GetVideosBeforeTime(time time.Time) ([]*Video, error) {
 	var videos []*Video
-	if err := v.db.Where("created_at < ?", time).Order("create_at DESC").Limit(constant.FeedLimit).Find(&videos).Error; err != nil {
+	if err := v.db.Where("created_at < ?", time).Order("created_at DESC").Limit(constant.FeedLimit).Find(&videos).Error; err != nil {
 		return nil, err
 	}
 	return videos, nil
