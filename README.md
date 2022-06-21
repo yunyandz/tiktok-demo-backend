@@ -10,6 +10,8 @@
 来自4396-云研顶针组。
 基于gin/gorm/s3的抖音项目服务端。
 
+🎉*该项目在字节青训营后端专场--基础班抖音项目中获得了* **第八名** *以及* **超级码力奖** *的好成绩！！开香槟咯*🎊🎊🎊
+
 ## 运行
 ``` bash
 git clone https://github.com/yunyandz/tiktok-demo-backend.git
